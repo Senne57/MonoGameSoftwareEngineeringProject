@@ -176,6 +176,18 @@
 /processorParam:TextureFormat=Color
 /build:Jump.png
 
+#begin Platform.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Platform.png
+
 #begin Run.png
 /importer:TextureImporter
 /processor:TextureProcessor

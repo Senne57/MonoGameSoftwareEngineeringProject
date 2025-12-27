@@ -8,40 +8,56 @@ namespace MonoGameProject.Components
         private Texture2D _texture;
         private int _frameCount;
         private float _frameTime;
-        private float _timer;
         private int _currentFrame;
+        private float _timer;
+        private bool _loop;
+        private bool _freezeLastFrame;
 
-        public int FrameWidth => _texture.Width / _frameCount;
-        public int FrameHeight => _texture.Height;
-
-        public Animation(Texture2D texture, int frameCount, float frameTime)
+        public Animation(Texture2D texture, int frameCount, float frameTime, bool loop = true, bool freezeLastFrame = false)
         {
             _texture = texture;
             _frameCount = frameCount;
             _frameTime = frameTime;
+            _loop = loop;
+            _freezeLastFrame = freezeLastFrame;
+            _currentFrame = 0;
+            _timer = 0f;
         }
+
+        public int CurrentFrame => _currentFrame; // ⬅ hier toevoegen
 
         public void Update(GameTime gameTime)
         {
-            _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (_freezeLastFrame && _currentFrame == _frameCount - 1) return;
 
+            _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (_timer >= _frameTime)
             {
                 _timer = 0f;
-                _currentFrame = (_currentFrame + 1) % _frameCount;
+                _currentFrame++;
+                if (_currentFrame >= _frameCount)
+                {
+                    if (_loop) _currentFrame = 0;
+                    else
+                    {
+                        if (_freezeLastFrame) _currentFrame = _frameCount - 1;
+                        else _currentFrame = 0;
+                    }
+                }
             }
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 position)
+        public void Reset()
         {
-            Rectangle source = new Rectangle(
-                _currentFrame * FrameWidth,
-                0,
-                FrameWidth,
-                FrameHeight
-            );
+            _currentFrame = 0;
+            _timer = 0f;
+        }
 
-            spriteBatch.Draw(_texture, position, source, Color.White);
+        public void Draw(SpriteBatch sb, Vector2 position, SpriteEffects flip)
+        {
+            int frameWidth = _texture.Width / _frameCount;
+            sb.Draw(_texture, position, new Rectangle(frameWidth * _currentFrame, 0, frameWidth, _texture.Height), Color.White, 0f, Vector2.Zero, 1f, flip, 0f);
         }
     }
+
 }

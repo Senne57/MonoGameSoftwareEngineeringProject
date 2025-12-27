@@ -1,14 +1,25 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoGameProject.Core
 {
-    public static class SceneManager
+    public class SceneManager
     {
-        public static IScene CurrentScene { get; private set; }
+        private IScene _currentScene;
 
-        public static void LoadScene(IScene scene)
+        public void ChangeScene(IScene scene)
         {
-            CurrentScene = scene;
+            _currentScene = scene;
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            _currentScene?.Update(gameTime);
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            _currentScene?.Draw(spriteBatch);
         }
     }
 }

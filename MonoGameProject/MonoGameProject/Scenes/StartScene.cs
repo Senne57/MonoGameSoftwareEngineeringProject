@@ -10,10 +10,12 @@ namespace MonoGameProject.Scenes
     {
         private SpriteFont _font;
         private ContentManager _content;
+        private SceneManager _sceneManager;
 
-        public StartScene(ContentManager content)
+        public StartScene(ContentManager content, SceneManager sceneManager)
         {
             _content = content;
+            _sceneManager = sceneManager;
             _font = content.Load<SpriteFont>("DefaultFont");
         }
 
@@ -21,7 +23,7 @@ namespace MonoGameProject.Scenes
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Enter))
             {
-                SceneManager.LoadScene(new LevelScene(_content));
+                _sceneManager.ChangeScene(new LevelScene(_content));
             }
         }
 

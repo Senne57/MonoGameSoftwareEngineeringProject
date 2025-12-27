@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using MonoGameProject.Core;
 using MonoGameProject.Scenes;
 
@@ -10,6 +9,7 @@ namespace MonoGameProject
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        private SceneManager _sceneManager;
 
         public Game1()
         {
@@ -20,21 +20,27 @@ namespace MonoGameProject
 
         protected override void Initialize()
         {
-            SceneManager.LoadScene(new StartScene(Content));
+            // Nodig voor HP-balken
+            TextureFactory.Init(GraphicsDevice);
+
+            _sceneManager = new SceneManager();
+
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // Start altijd met StartScene
+            _sceneManager.ChangeScene(new StartScene(Content, _sceneManager));
         }
+
+
 
         protected override void Update(GameTime gameTime)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            SceneManager.CurrentScene.Update(gameTime);
+            _sceneManager.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -43,7 +49,7 @@ namespace MonoGameProject
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
-            SceneManager.CurrentScene.Draw(_spriteBatch);
+            _sceneManager.Draw(_spriteBatch);
             _spriteBatch.End();
 
             base.Draw(gameTime);
