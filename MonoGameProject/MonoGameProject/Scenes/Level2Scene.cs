@@ -45,7 +45,6 @@ namespace MonoGameProject.Scenes
                 _spawnPoint
             );
 
-            // Level 2: meer enemies
             _enemies = new List<Enemy>
             {
                 new Enemy(
@@ -64,35 +63,32 @@ namespace MonoGameProject.Scenes
                     content.Load<Texture2D>("Enemy1Run"),
                     content.Load<Texture2D>("Enemy1Dead"),
                     new Vector2(1500, 100),
-                    armoredHead: true // Deze heeft armor
+                    armoredHead: false
                 )
             };
 
-            // Spike traps - HOGER en GROTER voor betere collision
-            Texture2D spikeTexture = CreateSpikeTexture(graphicsDevice);
+            Texture2D spikeTexture = content.Load<Texture2D>("4");
             _spikes = new List<SpikeTrap>
             {
-                new SpikeTrap(spikeTexture, new Vector2(300, 402)),   // Platform Y=450, spike 48px hoog
+                new SpikeTrap(spikeTexture, new Vector2(300, 347)),
                 new SpikeTrap(spikeTexture, new Vector2(900, 402)),
                 new SpikeTrap(spikeTexture, new Vector2(1300, 402))
             };
 
-            // Cannons
-            Texture2D cannonTexture = CreateCannonTexture(graphicsDevice);
-            Texture2D ballTexture = CreateBallTexture(graphicsDevice);
+            Texture2D cannonTexture = content.Load<Texture2D>("Cannon_main");
+            Texture2D ballTexture = content.Load<Texture2D>("Bomb");
 
             _cannons = new List<Cannon>
             {
-                new Cannon(cannonTexture, ballTexture, new Vector2(500, 380), new Vector2(1, 0)), // Schiet naar rechts
-                new Cannon(cannonTexture, ballTexture, new Vector2(1400, 280), new Vector2(-1, 0)) // Schiet naar links
+                new Cannon(cannonTexture, ballTexture, new Vector2(500, 380), new Vector2(1, 0)),
+                new Cannon(cannonTexture, ballTexture, new Vector2(1400, 280), new Vector2(-1, 0))
             };
 
-            // Platforms
             _platforms = new List<Platform>();
             Texture2D platformTex = content.Load<Texture2D>("platform");
 
-            _platforms.Add(new Platform(platformTex, new Vector2(0, 450), MapWidth, 20)); // Grond
-            _platforms.Add(new Platform(platformTex, new Vector2(250, 350), platformTex.Width, 20));
+            _platforms.Add(new Platform(platformTex, new Vector2(0, 400), platformTex.Width, 20));
+            _platforms.Add(new Platform(platformTex, new Vector2(250, 300), platformTex.Width, 20));
             _platforms.Add(new Platform(platformTex, new Vector2(600, 280), platformTex.Width, 20));
             _platforms.Add(new Platform(platformTex, new Vector2(900, 350), platformTex.Width, 20));
             _platforms.Add(new Platform(platformTex, new Vector2(1200, 280), platformTex.Width, 20));
@@ -102,37 +98,6 @@ namespace MonoGameProject.Scenes
             _camera.SetBounds(0, MapWidth, 0, MapHeight);
         }
 
-        // PLACEHOLDER TEXTURES
-        private Texture2D CreateSpikeTexture(GraphicsDevice gd)
-        {
-            Texture2D tex = new Texture2D(gd, 32, 48); // HOGER gemaakt (was 32, nu 48)
-            Color[] data = new Color[32 * 48];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = Color.DarkRed;
-            tex.SetData(data);
-            return tex;
-        }
-
-        private Texture2D CreateCannonTexture(GraphicsDevice gd)
-        {
-            Texture2D tex = new Texture2D(gd, 48, 48);
-            Color[] data = new Color[48 * 48];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = Color.Gray;
-            tex.SetData(data);
-            return tex;
-        }
-
-        private Texture2D CreateBallTexture(GraphicsDevice gd)
-        {
-            Texture2D tex = new Texture2D(gd, 16, 16);
-            Color[] data = new Color[16 * 16];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = Color.Black;
-            tex.SetData(data);
-            return tex;
-        }
-
         public void Update(GameTime gameTime)
         {
             KeyboardState currentKeyState = Keyboard.GetState();
@@ -140,7 +105,22 @@ namespace MonoGameProject.Scenes
             _player.Update(gameTime);
             _player.HandlePlatformCollision(_platforms);
 
-            // Boundaries
+            // ⬅ NIEUW: Player kan op cannons staan
+            foreach (var cannon in _cannons)
+            {
+                bool horizontal = _player.Bounds.Right > cannon.Bounds.Left &&
+                                 _player.Bounds.Left < cannon.Bounds.Right;
+                bool landing = _player.PreviousBounds.Bottom <= cannon.Bounds.Top &&
+                              _player.Bounds.Bottom >= cannon.Bounds.Top &&
+                              _player.Velocity.Y >= 0;
+
+                if (horizontal && landing)
+                {
+                    _player.Position.Y = cannon.Bounds.Top - 85;
+                    _player.Velocity.Y = 0;
+                }
+            }
+
             if (_player.Position.X < 0) _player.Position.X = 0;
             if (_player.Position.X > MapWidth - _player.Bounds.Width)
                 _player.Position.X = MapWidth - _player.Bounds.Width;
@@ -150,7 +130,6 @@ namespace MonoGameProject.Scenes
 
             _camera.Follow(_player.Position);
 
-            // Enemy updates
             foreach (var enemy in _enemies)
             {
                 enemy.Update(gameTime);
@@ -158,7 +137,6 @@ namespace MonoGameProject.Scenes
 
                 if (!enemy.IsAlive) continue;
 
-                // 1. Check stomp EERST (hoogste prioriteit)
                 bool playerStomped = false;
                 if (enemy.CanBeStomped && _player.Velocity.Y > 0)
                 {
@@ -176,7 +154,6 @@ namespace MonoGameProject.Scenes
                     }
                 }
 
-                // 2. Attack collision (als niet gestompt)
                 if (!playerStomped && _player.AttackHitbox != Rectangle.Empty &&
                     !_player.AttackHitEnemies.Contains(enemy) &&
                     _player.AttackHitbox.Intersects(enemy.Bounds))
@@ -185,39 +162,33 @@ namespace MonoGameProject.Scenes
                     _player.AttackHitEnemies.Add(enemy);
                 }
 
-                // 3. Enemy damage player - ALLEEN als NIET gestompt
                 if (!playerStomped && _player.Bounds.Intersects(enemy.Bounds))
                     _player.TakeDamage(20);
             }
 
-            // Spike collision
             foreach (var spike in _spikes)
             {
                 if (_player.Bounds.Intersects(spike.Bounds))
                     _player.TakeDamage(spike.Damage);
             }
 
-            // Cannon updates en projectile collision
             foreach (var cannon in _cannons)
             {
                 cannon.Update(gameTime);
 
-                // Check alle cannonballs
                 for (int i = cannon.CannonBalls.Count - 1; i >= 0; i--)
                 {
                     var ball = cannon.CannonBalls[i];
                     if (!ball.IsActive) continue;
 
-                    // Simpele collision check
                     if (_player.Bounds.Intersects(ball.Bounds))
                     {
                         _player.TakeDamage(ball.Damage);
-                        ball.IsActive = false; // Destroy cannonball
+                        ball.Explode();
                     }
                 }
             }
 
-            // Death/respawn check
             if (_player.HP <= 0)
             {
                 if (_player.Lives > 0)
@@ -231,7 +202,6 @@ namespace MonoGameProject.Scenes
                 }
             }
 
-            // Victory condition: alle enemies dood
             bool allDead = true;
             foreach (var e in _enemies)
             {
@@ -272,7 +242,6 @@ namespace MonoGameProject.Scenes
             sb.End();
             sb.Begin();
 
-            // UI
             sb.DrawString(_font, $"Lives: {_player.Lives}", new Vector2(10, 10), Color.White);
             sb.DrawString(_font, "LEVEL 2", new Vector2(10, 30), Color.Yellow);
 
