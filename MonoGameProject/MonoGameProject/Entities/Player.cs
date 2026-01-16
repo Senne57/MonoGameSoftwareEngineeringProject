@@ -8,10 +8,8 @@ using System.Collections.Generic;
 
 namespace MonoGameProject.Entities
 {
-    public class Player
+    public class Player : Entity
     {
-        public Vector2 Position;
-        public Vector2 Velocity;
         private Animation _idle, _run, _jump, _attack;
         private Animation _current;
         private const float Speed = 220f;
@@ -33,13 +31,11 @@ namespace MonoGameProject.Entities
         private const float InvincibilityDuration = 1.5f;
         private float _flickerTimer;
 
-        // Hitboxes
-        public Rectangle Bounds => new Rectangle((int)Position.X + 40, (int)Position.Y + 45, 45, 85);
+        // ✅ Override Bounds from Entity
+        public override Rectangle Bounds => new Rectangle((int)Position.X + 40, (int)Position.Y + 45, 45, 85);
 
-        // PreviousBounds voor STOMP detection (gebruikt andere logica)
         public Rectangle PreviousBounds => new Rectangle((int)_previousPosition.X + 40, (int)_previousPosition.Y + 45, 45, 85);
 
-        // APARTE PreviousBounds voor PLATFORM collision (gebruikt oude logica die werkt)
         private Rectangle PlatformPreviousBounds => new Rectangle((int)_previousPosition.X, (int)_previousPosition.Y, 48, 64);
 
         public HashSet<Enemy> AttackHitEnemies => _attackHitEnemies;
@@ -54,7 +50,7 @@ namespace MonoGameProject.Entities
             _current = _idle;
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             if (HP <= 0) return;
 
@@ -70,10 +66,20 @@ namespace MonoGameProject.Entities
             }
 
             KeyboardState k = Keyboard.GetState();
-            Velocity.X = 0;
-            if (k.IsKeyDown(Keys.Q)) { Velocity.X = -Speed; _facingRight = false; }
-            if (k.IsKeyDown(Keys.D)) { Velocity.X = Speed; _facingRight = true; }
-            if (k.IsKeyDown(Keys.Z) && _isGrounded) { Velocity.Y = JumpForce; _isGrounded = false; }
+
+            // ✅ FIX: Vervang hele Velocity property voor X component
+            float velocityX = 0;
+            if (k.IsKeyDown(Keys.Q)) { velocityX = -Speed; _facingRight = false; }
+            if (k.IsKeyDown(Keys.D)) { velocityX = Speed; _facingRight = true; }
+            Velocity = new Vector2(velocityX, Velocity.Y);
+
+            // ✅ FIX: Jump - vervang hele Velocity property
+            if (k.IsKeyDown(Keys.Z) && _isGrounded)
+            {
+                Velocity = new Vector2(Velocity.X, JumpForce);
+                _isGrounded = false;
+            }
+
             if (k.IsKeyDown(Keys.E) && !_isAttacking)
             {
                 _isAttacking = true;
@@ -89,8 +95,9 @@ namespace MonoGameProject.Entities
                 if (_attackTimer <= 0) _isAttacking = false;
             }
 
-            Velocity.Y += Gravity * dt;
-            Position += Velocity * dt;
+            // ✅ Gebruik Entity helper methods
+            ApplyGravity(Gravity, gameTime);
+            ApplyVelocity(gameTime);
 
             if (_isAttacking) _current = _attack;
             else if (!_isGrounded) _current = _jump;
@@ -106,12 +113,12 @@ namespace MonoGameProject.Entities
             foreach (var p in platforms)
             {
                 bool horizontal = Bounds.Right > p.Bounds.Left && Bounds.Left < p.Bounds.Right;
-                // Gebruik PlatformPreviousBounds voor platform collision
                 bool landing = PlatformPreviousBounds.Bottom <= p.Bounds.Top && Bounds.Bottom >= p.Bounds.Top && Velocity.Y >= 0;
                 if (horizontal && landing)
                 {
-                    Position.Y = p.Bounds.Top - 90;
-                    Velocity.Y = 0;
+                    // ✅ FIX: Vervang hele Position en Velocity properties
+                    Position = new Vector2(Position.X, p.Bounds.Top - 90);
+                    Velocity = new Vector2(Velocity.X, 0);
                     _isGrounded = true;
                 }
             }
@@ -154,7 +161,7 @@ namespace MonoGameProject.Entities
             }
         }
 
-        public void Draw(SpriteBatch sb)
+        public override void Draw(SpriteBatch sb)
         {
             if (IsInvincible && (int)(_flickerTimer * 10) % 2 == 0)
                 return;
@@ -165,7 +172,6 @@ namespace MonoGameProject.Entities
             sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X, (int)Position.Y - 10, 48, 5), Color.Red);
             sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X, (int)Position.Y - 10, (int)(48 * (HP / (float)MaxHP)), 5), Color.Lime);
 
-            // DEBUG: Teken collision box (groen)
             sb.Draw(TextureFactory.Pixel, Bounds, Color.Lime * 0.3f);
         }
     }

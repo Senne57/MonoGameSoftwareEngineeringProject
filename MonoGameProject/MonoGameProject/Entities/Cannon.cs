@@ -12,12 +12,12 @@ namespace MonoGameProject.Entities
         private float _shootInterval = 2.5f;
         private Vector2 _shootDirection;
         private bool _facingRight;
-        private const float Scale = 2.0f; // ⬅ NIEUW: 2x groter
+        private const float Scale = 2.0f;
 
         public List<CannonBall> CannonBalls = new List<CannonBall>();
 
-        // ⬅ NIEUW: Bounds voor collision (player kan erop staan)
-        public Rectangle Bounds =>
+        // ✅ Override Bounds from Entity base class
+        public override Rectangle Bounds =>
             new Rectangle((int)Position.X, (int)Position.Y, (int)(48 * Scale), (int)(48 * Scale));
 
         public Cannon(Texture2D cannonTex, Texture2D ballTex, Vector2 position, Vector2 shootDirection)
@@ -28,9 +28,9 @@ namespace MonoGameProject.Entities
             _shootDirection = Vector2.Normalize(shootDirection);
             _shootTimer = _shootInterval;
 
-            if (_shootDirection.X > 0) // Naar rechts
+            if (_shootDirection.X > 0)
                 _facingRight = false;
-            else if (_shootDirection.X < 0) // Naar links
+            else if (_shootDirection.X < 0)
                 _facingRight = true;
         }
 
@@ -55,12 +55,8 @@ namespace MonoGameProject.Entities
 
         private void Shoot()
         {
-            // ⬅ GEFIXED: Spawn positie aangepast voor grotere cannon
-            // Center van de cannon, maar iets naar voren (in shoot richting)
             float centerX = Position.X + (48 * Scale / 2f);
             float centerY = Position.Y + (48 * Scale / 2f);
-
-            // Offset voor waar de bal uit komt (aan de voorkant van cannon)
             float offsetX = _shootDirection.X * (48 * Scale / 2f) - 50;
             float offsetY = _shootDirection.Y * (48 * Scale / 2f) - 50;
 
@@ -71,10 +67,7 @@ namespace MonoGameProject.Entities
         public override void Draw(SpriteBatch sb)
         {
             SpriteEffects flip = _facingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-
-            // ⬅ NIEUW: Gebruik Scale parameter om groter te tekenen
             sb.Draw(_cannonTexture, Position, null, Color.White, 0f, Vector2.Zero, Scale, flip, 0f);
-
             sb.Draw(MonoGameProject.Core.TextureFactory.Pixel, Bounds, Color.Green * 0.3f);
 
             foreach (var ball in CannonBalls)

@@ -6,48 +6,35 @@ using System.Collections.Generic;
 
 namespace MonoGameProject.Entities
 {
-    public class Enemy : Entity
+    /// <summary>
+    /// Abstract base class voor alle enemy types
+    /// Volgt SOLID principes: Single Responsibility en Open/Closed
+    /// </summary>
+    public abstract class Enemy : Entity
     {
-        private Animation _run;
-        private Animation _death;
-        private bool _isDead;
-        private bool _armoredHead;
-        public int MaxHP = 50;
-        public int HP = 50;
-        private const float Gravity = 1100f;
-        private float _speed = 80f;
-        private bool _facingRight = true;
+        protected Animation _run;
+        protected Animation _death;
+        protected bool _isDead;
 
-        // Bounds - Moeten meebewegen met flip
-        public Rectangle Bounds
-        {
-            get
-            {
-                if (_facingRight)
-                    return new Rectangle((int)Position.X + 30, (int)Position.Y + 65, 45, 70);
-                else
-                    return new Rectangle((int)Position.X + 53, (int)Position.Y + 65, 45, 70); // Offset iets anders
-            }
-        }
+        public int MaxHP { get; protected set; }
+        public int HP { get; protected set; }
 
-        // HeadHitbox - Moet ook meebewegen met flip
-        public Rectangle HeadHitbox
-        {
-            get
-            {
-                if (_facingRight)
-                    return new Rectangle((int)Position.X + 50, (int)Position.Y + 52, 18, 15);
-                else
-                    return new Rectangle((int)Position.X + 62, (int)Position.Y + 52, 18, 15); // Offset iets anders
-            }
-        }
+        protected const float Gravity = 1100f;
+        protected float _speed = 80f;
+        protected bool _facingRight = true;
 
-        public Enemy(Texture2D run, Texture2D dead, Vector2 startPos, bool armoredHead)
+        // Abstract properties - elke enemy type implementeert zijn eigen hitboxes
+        public abstract Rectangle Bounds { get; }
+        public abstract Rectangle HeadHitbox { get; }
+
+        // Template method - bepaalt of deze enemy gestomped kan worden
+        public abstract bool CanBeStomped { get; }
+
+        protected Enemy(Texture2D runTexture, Texture2D deathTexture, Vector2 startPos)
         {
             Position = startPos;
-            _armoredHead = armoredHead;
-            _run = new Animation(run, 8, 0.1f);
-            _death = new Animation(dead, 3, 0.2f, loop: false, freezeLastFrame: true);
+            _run = new Animation(runTexture, 8, 0.1f);
+            _death = new Animation(deathTexture, 3, 0.2f, loop: false, freezeLastFrame: true);
         }
 
         public override void Update(GameTime gameTime)
@@ -58,10 +45,10 @@ namespace MonoGameProject.Entities
                 return;
             }
 
-            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // ✅ FIX: Vervang hele Velocity property voor X component
+            Velocity = new Vector2(_speed, Velocity.Y);
 
-            Velocity.X = _speed;
-
+            // Patrol beweging
             if (Position.X < 100)
             {
                 _speed = 80f;
@@ -73,8 +60,10 @@ namespace MonoGameProject.Entities
                 _facingRight = false;
             }
 
-            Velocity.Y += Gravity * dt;
-            Position += Velocity * dt;
+            // Gebruik Entity helper methods
+            ApplyGravity(Gravity, gameTime);
+            ApplyVelocity(gameTime);
+
             _run.Update(gameTime);
         }
 
@@ -89,14 +78,18 @@ namespace MonoGameProject.Entities
                     Bounds.Bottom >= p.Bounds.Top &&
                     Velocity.Y >= 0)
                 {
-                    // FIX: Minder aftrekken zodat enemy lager staat
-                    Position.Y = p.Bounds.Top - 95; // Was 135, nu 128
-                    Velocity.Y = 0;
+                    // ✅ FIX: Vervang hele Position en Velocity properties
+                    Position = new Vector2(Position.X, p.Bounds.Top - GetGroundOffset());
+                    Velocity = new Vector2(Velocity.X, 0);
                 }
             }
         }
 
-        public void TakeDamage(int dmg)
+        // Template method - subclasses bepalen hun eigen ground offset
+        protected abstract float GetGroundOffset();
+
+        // Virtual method - kan worden override voor speciale damage handling
+        public virtual void TakeDamage(int dmg)
         {
             if (_isDead) return;
             HP -= dmg;
@@ -105,7 +98,6 @@ namespace MonoGameProject.Entities
         }
 
         public bool IsAlive => !_isDead;
-        public bool CanBeStomped => !_armoredHead;
 
         public override void Draw(SpriteBatch sb)
         {
@@ -114,13 +106,20 @@ namespace MonoGameProject.Entities
             SpriteEffects flip = _facingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
             anim.Draw(sb, Position, flip);
 
-            // HP bar
+            DrawHealthBar(sb);
+            DrawDebugHitboxes(sb);
+        }
+
+        protected virtual void DrawHealthBar(SpriteBatch sb)
+        {
             sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X, (int)Position.Y - 8, 48, 5), Color.Red);
             sb.Draw(TextureFactory.Pixel,
                 new Rectangle((int)Position.X, (int)Position.Y - 8, (int)(48 * (HP / (float)MaxHP)), 5),
                 Color.Lime);
+        }
 
-            // DEBUG: Teken hitboxes
+        protected virtual void DrawDebugHitboxes(SpriteBatch sb)
+        {
             sb.Draw(TextureFactory.Pixel, Bounds, Color.Red * 0.3f);
             sb.Draw(TextureFactory.Pixel, HeadHitbox, Color.Blue * 0.5f);
         }

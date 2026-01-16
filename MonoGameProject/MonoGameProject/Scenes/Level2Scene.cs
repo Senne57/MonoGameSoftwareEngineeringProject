@@ -45,25 +45,26 @@ namespace MonoGameProject.Scenes
                 _spawnPoint
             );
 
+            // ✅ UPDATED: Mix van verschillende enemy types voor variety
             _enemies = new List<Enemy>
             {
-                new Enemy(
+                // NormalEnemy - kan gestomped worden
+                new NormalEnemy(
                     content.Load<Texture2D>("Enemy1Run"),
                     content.Load<Texture2D>("Enemy1Dead"),
-                    new Vector2(600, 100),
-                    armoredHead: false
+                    new Vector2(600, 100)
                 ),
-                new Enemy(
-                    content.Load<Texture2D>("Enemy1Run"),
-                    content.Load<Texture2D>("Enemy1Dead"),
-                    new Vector2(1100, 100),
-                    armoredHead: false
+                // ArmoredKnight - NIET stomp-baar, gebruikt Walk.png en DeadKnight.png
+                new ArmoredKnight(
+                    content.Load<Texture2D>("Walk"),
+                    content.Load<Texture2D>("DeadKnight"),
+                    new Vector2(1100, 100)
                 ),
-                new Enemy(
+                // NormalEnemy
+                new NormalEnemy(
                     content.Load<Texture2D>("Enemy1Run"),
                     content.Load<Texture2D>("Enemy1Dead"),
-                    new Vector2(1500, 100),
-                    armoredHead: false
+                    new Vector2(1500, 100)
                 )
             };
 
@@ -105,7 +106,7 @@ namespace MonoGameProject.Scenes
             _player.Update(gameTime);
             _player.HandlePlatformCollision(_platforms);
 
-            // ⬅ NIEUW: Player kan op cannons staan
+            // Player kan op cannons staan
             foreach (var cannon in _cannons)
             {
                 bool horizontal = _player.Bounds.Right > cannon.Bounds.Left &&
@@ -116,14 +117,17 @@ namespace MonoGameProject.Scenes
 
                 if (horizontal && landing)
                 {
-                    _player.Position.Y = cannon.Bounds.Top - 85;
-                    _player.Velocity.Y = 0;
+                    // ✅ FIX: Vector2 struct - vervang hele property
+                    _player.Position = new Vector2(_player.Position.X, cannon.Bounds.Top - 85);
+                    _player.Velocity = new Vector2(_player.Velocity.X, 0);
                 }
             }
 
-            if (_player.Position.X < 0) _player.Position.X = 0;
+            // ✅ FIX: Vector2 struct - vervang hele property
+            if (_player.Position.X < 0)
+                _player.Position = new Vector2(0, _player.Position.Y);
             if (_player.Position.X > MapWidth - _player.Bounds.Width)
-                _player.Position.X = MapWidth - _player.Bounds.Width;
+                _player.Position = new Vector2(MapWidth - _player.Bounds.Width, _player.Position.Y);
 
             if (_player.Position.Y > MapHeight)
                 _player.TakeDamage(999);
@@ -138,6 +142,8 @@ namespace MonoGameProject.Scenes
                 if (!enemy.IsAlive) continue;
 
                 bool playerStomped = false;
+
+                // ✅ UPDATED: Polymorphic stomp handling
                 if (enemy.CanBeStomped && _player.Velocity.Y > 0)
                 {
                     int xOverlap = Math.Min(_player.Bounds.Right, enemy.HeadHitbox.Right) -
@@ -148,9 +154,29 @@ namespace MonoGameProject.Scenes
 
                     if (xOverlap > 10 && yOverlap > 0 && fromAbove)
                     {
-                        enemy.TakeDamage(20);
-                        _player.Velocity.Y = -300f;
-                        playerStomped = true;
+                        if (enemy is NormalEnemy normalEnemy)
+                        {
+                            normalEnemy.HandleStompDamage(20);
+                            // ✅ FIX: Vervang hele Velocity property
+                            _player.Velocity = new Vector2(_player.Velocity.X, -300f);
+                            playerStomped = true;
+                        }
+                    }
+                }
+                else if (!enemy.CanBeStomped && _player.Velocity.Y > 0)
+                {
+                    // Player probeert te stompen op armored knight = damage
+                    int xOverlap = Math.Min(_player.Bounds.Right, enemy.HeadHitbox.Right) -
+                                   Math.Max(_player.Bounds.Left, enemy.HeadHitbox.Left);
+                    int yOverlap = Math.Min(_player.Bounds.Bottom, enemy.HeadHitbox.Bottom) -
+                                   Math.Max(_player.Bounds.Top, enemy.HeadHitbox.Top);
+                    bool fromAbove = _player.PreviousBounds.Bottom <= enemy.HeadHitbox.Top + 5;
+
+                    if (xOverlap > 10 && yOverlap > 0 && fromAbove)
+                    {
+                        _player.TakeDamage(15);
+                        // ✅ FIX: Vervang hele Velocity property
+                        _player.Velocity = new Vector2(_player.Velocity.X, -200f);
                     }
                 }
 

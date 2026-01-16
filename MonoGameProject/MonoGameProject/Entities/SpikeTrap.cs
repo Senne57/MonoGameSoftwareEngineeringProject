@@ -10,11 +10,11 @@ namespace MonoGameProject.Entities
         public int Damage = 30;
         private const int FixedFrame = 2; // Frame 3 (index 2) = omhoog
 
-        public Rectangle Bounds
+        // ✅ Override Bounds from Entity base class
+        public override Rectangle Bounds
         {
             get
             {
-                // Bereken frame grootte
                 int frameWidth = _texture.Width / 7; // 7 frames in sprite sheet
                 return new Rectangle((int)Position.X, (int)Position.Y + 25, frameWidth, _texture.Height - 25);
             }
@@ -28,13 +28,13 @@ namespace MonoGameProject.Entities
 
         public override void Update(GameTime gameTime)
         {
-            // Spikes staan stil
+            // Spikes staan stil - geen update nodig
         }
 
         public override void Draw(SpriteBatch sb)
         {
             // Teken alleen frame 3 (omhoog)
-            int frameWidth = _texture.Width / 7; // 7 frames in sprite sheet
+            int frameWidth = _texture.Width / 7;
             Rectangle sourceRect = new Rectangle(frameWidth * FixedFrame, 0, frameWidth, _texture.Height);
 
             sb.Draw(_texture, Position, sourceRect, Color.White);
