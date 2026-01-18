@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameProject.Core;
 using MonoGameProject.Scenes;
+using System;
 
 namespace MonoGameProject
 {
@@ -28,6 +29,10 @@ namespace MonoGameProject
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // ✅ NIEUW: Laad alle muziek (3 tracks)
+            MusicHelper.LoadAllMusic(Content);
+
             _sceneManager.ChangeScene(new StartScene(Content, _sceneManager, this));
         }
 

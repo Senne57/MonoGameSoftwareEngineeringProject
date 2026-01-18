@@ -241,6 +241,12 @@
 /processorParam:TextureFormat=Color
 /build:BOSSHURT.png
 
+#begin BossTheme.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:BossTheme.mp3
+
 #begin Cannon_main.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -427,6 +433,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Jump.png
+
+#begin MainTheme.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:MainTheme.mp3
+
+#begin MenuTheme.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:MenuTheme.mp3
 
 #begin Platform.png
 /importer:TextureImporter

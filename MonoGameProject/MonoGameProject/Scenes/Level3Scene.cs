@@ -28,7 +28,7 @@ namespace MonoGameProject.Scenes
         private Vector2 _bossSpawnPoint = new Vector2(-150, 100);
 
         private CollisionManager _collisionManager;
-        private Background _background; // ✅ NIEUW
+        private Background _background;
 
         private const int MapWidth = 5000;
         private const int MapHeight = 480;
@@ -113,8 +113,11 @@ namespace MonoGameProject.Scenes
 
             _collisionManager = new CollisionManager();
 
-            // ✅ NIEUW: Creëer Level 3 background
+            // Creëer Level 3 background
             _background = BackgroundFactory.CreateLevel3Background(content, MapWidth, MapHeight);
+
+            // ✅ NIEUW: Start BOSS muziek!
+            MusicManager.Instance.Play(MusicHelper.MusicNames.Boss, repeat: true);
         }
 
         public void Update(GameTime gameTime)
@@ -158,10 +161,8 @@ namespace MonoGameProject.Scenes
             if (_player.Position.Y > MapHeight)
                 _player.TakeDamage(999);
 
-            // ✅✅✅ CRITICAL FIX: Boss update ALTIJD (ook tijdens death voor animatie!)
             _boss.Update(gameTime);
 
-            // Alleen volgen en collision check als boss nog leeft
             if (_boss.IsAlive)
             {
                 _boss.FollowPlayerVertically(_player.Position, gameTime);
@@ -169,7 +170,6 @@ namespace MonoGameProject.Scenes
             }
             else
             {
-                // ✅ Als boss dood is, verwijder alle cannonballs
                 foreach (var cannon in _cannons)
                 {
                     cannon.CannonBalls.Clear();

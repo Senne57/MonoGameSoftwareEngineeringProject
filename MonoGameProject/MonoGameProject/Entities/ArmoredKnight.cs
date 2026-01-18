@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGameProject.Core;
 
 namespace MonoGameProject.Entities
 {
@@ -61,11 +62,20 @@ namespace MonoGameProject.Entities
 
         protected override void DrawHealthBar(SpriteBatch sb)
         {
-            sb.Draw(MonoGameProject.Core.TextureFactory.Pixel,
-                new Rectangle((int)Position.X, (int)Position.Y - 8, 48, 5), Color.DarkRed);
-            sb.Draw(MonoGameProject.Core.TextureFactory.Pixel,
-                new Rectangle((int)Position.X, (int)Position.Y - 8, (int)(48 * (HP / (float)MaxHP)), 5),
-                Color.Orange);
+            if (_facingRight)
+            {
+                sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X + 10, (int)Position.Y + 45, 48, 5), Color.DarkRed);
+                sb.Draw(TextureFactory.Pixel,
+                    new Rectangle((int)Position.X + 10, (int)Position.Y + 45, (int)(48 * (HP / (float)MaxHP)), 5),
+                    Color.Orange);
+            }
+            else
+            {
+                sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X + 70, (int)Position.Y + 45, 48, 5), Color.DarkRed);
+                sb.Draw(TextureFactory.Pixel,
+                    new Rectangle((int)Position.X + 70, (int)Position.Y + 45, (int)(48 * (HP / (float)MaxHP)), 5),
+                    Color.Orange);
+            }
         }
     }
 }

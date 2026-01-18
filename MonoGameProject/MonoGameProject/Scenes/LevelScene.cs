@@ -22,7 +22,7 @@ namespace MonoGameProject.Scenes
         private Vector2 _spawnPoint = new Vector2(100, 100);
 
         private CollisionManager _collisionManager;
-        private Background _background; // ✅ NIEUW
+        private Background _background;
 
         private const int MapWidth = 1100;
         private const int MapHeight = 480;
@@ -45,16 +45,13 @@ namespace MonoGameProject.Scenes
                 _spawnPoint
             );
 
-            // ✅ UPDATED: Mix van NormalEnemy en ArmoredKnight
             _enemies = new List<Enemy>
             {
-                // ArmoredKnight - gebruikt Walk.png voor run, DeadKnight.png voor death
                 new ArmoredKnight(
-                    content.Load<Texture2D>("Walk"),       // Run animatie
-                    content.Load<Texture2D>("DeadKnight"), // Death animatie
+                    content.Load<Texture2D>("Walk"),
+                    content.Load<Texture2D>("DeadKnight"),
                     new Vector2(400, 100)
                 ),
-                // NormalEnemy - gebruikt Enemy1Run.png
                 new NormalEnemy(
                     content.Load<Texture2D>("Enemy1Run"),
                     content.Load<Texture2D>("Enemy1Dead"),
@@ -74,8 +71,11 @@ namespace MonoGameProject.Scenes
 
             _collisionManager = new CollisionManager();
 
-            // ✅ NIEUW: Creëer Level 1 background
+            // Creëer Level 1 background
             _background = BackgroundFactory.CreateLevel1Background(content, MapWidth, MapHeight);
+
+            // ✅ NIEUW: Start Level 1 & 2 muziek (MainTheme)
+            MusicManager.Instance.Play(MusicHelper.MusicNames.Main, repeat: true);
         }
 
         public void Update(GameTime gameTime)
@@ -84,10 +84,8 @@ namespace MonoGameProject.Scenes
 
             _player.Update(gameTime);
 
-            // ✅ NIEUW: Gebruik CollisionManager voor alle collisions
             _collisionManager.CheckPlayerPlatformCollisions(_player, _platforms);
 
-            // Map boundaries
             if (_player.Position.X < 0)
                 _player.Position = new Vector2(0, _player.Position.Y);
             if (_player.Position.X > MapWidth - _player.Bounds.Width)
@@ -98,13 +96,11 @@ namespace MonoGameProject.Scenes
 
             _camera.Follow(_player.Position);
 
-            // Update alle enemies
             foreach (var enemy in _enemies)
             {
                 enemy.Update(gameTime);
             }
 
-            // ✅ NIEUW: Gebruik CollisionManager voor enemy collisions
             _collisionManager.CheckEnemyPlatformCollisions(_enemies, _platforms);
             _collisionManager.CheckPlayerEnemyCollisions(_player, _enemies);
 
@@ -144,7 +140,6 @@ namespace MonoGameProject.Scenes
             sb.End();
             sb.Begin(transformMatrix: _camera.Transform);
 
-            // ✅ Teken background EERST (met camera transform)
             _background.Draw(sb, _camera.Transform);
 
             foreach (var p in _platforms)

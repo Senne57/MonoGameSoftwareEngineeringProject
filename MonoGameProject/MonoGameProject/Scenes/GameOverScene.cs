@@ -14,7 +14,7 @@ namespace MonoGameProject.Scenes
         private Game _game;
         private bool _isVictory;
         private KeyboardState _previousKeyState;
-        private Background _background; // ✅ SOLID: Dependency op abstractie
+        private Background _background;
 
         public GameOverScene(ContentManager content, SceneManager sceneManager, Game game, bool victory)
         {
@@ -24,16 +24,19 @@ namespace MonoGameProject.Scenes
             _isVictory = victory;
             _font = content.Load<SpriteFont>("DefaultFont");
 
-            // ✅ Creëer juiste background via Factory
+            // Creëer juiste background via Factory
             if (_isVictory)
                 _background = BackgroundFactory.CreateVictoryBackground(content);
             else
                 _background = BackgroundFactory.CreateGameOverBackground(content);
+
+            // ✅ NIEUW: Speel MenuTheme muziek (voor zowel Victory als Game Over)
+            MusicManager.Instance.Play(MusicHelper.MusicNames.Menu, repeat: true);
         }
 
         public void Update(GameTime gameTime)
         {
-            // ✅ Update background animatie
+            // Update background animatie
             _background.Update(gameTime);
 
             KeyboardState currentKeyState = Keyboard.GetState();
@@ -49,25 +52,21 @@ namespace MonoGameProject.Scenes
 
         public void Draw(SpriteBatch sb)
         {
-            // ✅ Teken background EERST
+            // Teken background EERST
             _background.Draw(sb);
 
             if (_isVictory)
             {
                 // WIN SCREEN
                 string restart = "Press ENTER to play again";
-
                 Vector2 restartSize = _font.MeasureString(restart);
-
                 sb.DrawString(_font, restart, new Vector2(400 - restartSize.X / 2, 400), Color.LightGray);
             }
             else
             {
                 // LOSE SCREEN
                 string restart = "Press ENTER to play again";
-
                 Vector2 restartSize = _font.MeasureString(restart);
-
                 sb.DrawString(_font, restart, new Vector2(400 - restartSize.X / 2, 400), Color.LightGray);
             }
         }

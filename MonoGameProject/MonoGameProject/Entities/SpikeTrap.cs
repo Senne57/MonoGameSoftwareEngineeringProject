@@ -16,7 +16,7 @@ namespace MonoGameProject.Entities
             get
             {
                 int frameWidth = _texture.Width / 7; // 7 frames in sprite sheet
-                return new Rectangle((int)Position.X, (int)Position.Y + 25, frameWidth, _texture.Height - 25);
+                return new Rectangle((int)Position.X + 15, (int)Position.Y + 35, frameWidth - 30, _texture.Height - 25);
             }
         }
 

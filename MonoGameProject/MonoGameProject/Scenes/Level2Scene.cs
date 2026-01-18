@@ -23,7 +23,7 @@ namespace MonoGameProject.Scenes
         private Game _game;
         private Vector2 _spawnPoint = new Vector2(100, 100);
         private CollisionManager _collisionManager;
-        private Background _background; // ✅ NIEUW
+        private Background _background;
 
         private const int MapWidth = 2000;
         private const int MapHeight = 480;
@@ -68,9 +68,9 @@ namespace MonoGameProject.Scenes
             Texture2D spikeTexture = content.Load<Texture2D>("4");
             _spikes = new List<SpikeTrap>
             {
-                new SpikeTrap(spikeTexture, new Vector2(330, 300)),
+                new SpikeTrap(spikeTexture, new Vector2(330, 295)),
                 new SpikeTrap(spikeTexture, new Vector2(1100, 350)),
-                new SpikeTrap(spikeTexture, new Vector2(1300, 402))
+                new SpikeTrap(spikeTexture, new Vector2(800, 190))
             };
 
             Texture2D cannonTexture = content.Load<Texture2D>("Cannon_main");
@@ -78,8 +78,8 @@ namespace MonoGameProject.Scenes
 
             _cannons = new List<Cannon>
             {
-                new Cannon(cannonTexture, ballTexture, new Vector2(500, 380), new Vector2(1, 0)),
-                new Cannon(cannonTexture, ballTexture, new Vector2(1400, 280), new Vector2(-1, 0))
+                new Cannon(cannonTexture, ballTexture, new Vector2(450, 280), new Vector2(1, 0)),
+                new Cannon(cannonTexture, ballTexture, new Vector2(1400, 190), new Vector2(-1, 0))
             };
 
             _platforms = new List<Platform>();
@@ -97,8 +97,11 @@ namespace MonoGameProject.Scenes
 
             _collisionManager = new CollisionManager();
 
-            // ✅ NIEUW: Creëer Level 2 background
+            // Creëer Level 2 background
             _background = BackgroundFactory.CreateLevel2Background(content, MapWidth, MapHeight);
+
+            // ✅ NIEUW: MainTheme muziek blijft gewoon spelen (geen nieuwe Play() call)
+            // Level 1 speelt al MainTheme, dus die blijft gewoon doorlopen naar Level 2!
         }
 
         public void Update(GameTime gameTime)
@@ -171,7 +174,6 @@ namespace MonoGameProject.Scenes
             sb.End();
             sb.Begin(transformMatrix: _camera.Transform);
 
-            // ✅ Teken background EERST (met camera transform)
             _background.Draw(sb, _camera.Transform);
 
             foreach (var p in _platforms)

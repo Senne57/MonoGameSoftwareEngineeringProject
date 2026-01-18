@@ -112,10 +112,20 @@ namespace MonoGameProject.Entities
 
         protected virtual void DrawHealthBar(SpriteBatch sb)
         {
-            sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X, (int)Position.Y - 8, 48, 5), Color.Red);
-            sb.Draw(TextureFactory.Pixel,
-                new Rectangle((int)Position.X, (int)Position.Y - 8, (int)(48 * (HP / (float)MaxHP)), 5),
-                Color.Lime);
+            if (_facingRight)
+            {
+                sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X + 30, (int)Position.Y + 30, 48, 5), Color.Red);
+                sb.Draw(TextureFactory.Pixel,
+                    new Rectangle((int)Position.X + 30, (int)Position.Y + 30, (int)(48 * (HP / (float)MaxHP)), 5),
+                    Color.Lime);
+            }
+            else
+            {
+                sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X + 50, (int)Position.Y + 30, 48, 5), Color.Red);
+                sb.Draw(TextureFactory.Pixel,
+                    new Rectangle((int)Position.X + 50, (int)Position.Y + 30, (int)(48 * (HP / (float)MaxHP)), 5),
+                    Color.Lime);
+            }
         }
 
         protected virtual void DrawDebugHitboxes(SpriteBatch sb)
