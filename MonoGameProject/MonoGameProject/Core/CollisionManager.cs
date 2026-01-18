@@ -6,15 +6,12 @@ using System.Collections.Generic;
 namespace MonoGameProject.Core
 {
     /// <summary>
-    /// CollisionManager - Verantwoordelijk voor ALLE collision detection
-    /// Volgt SOLID: Single Responsibility Principle
+    /// Centralized collision detection system
+    /// Separates collision logic from entity behavior
     /// </summary>
     public class CollisionManager
     {
-        // ============================================
-        // PLAYER <-> PLATFORM COLLISIONS
-        // ============================================
-
+        // Player platform collision with previous-frame landing detection
         public void CheckPlayerPlatformCollisions(Player player, List<Platform> platforms)
         {
             player.SetGrounded(false);
@@ -23,6 +20,8 @@ namespace MonoGameProject.Core
             {
                 bool horizontal = player.Bounds.Right > platform.Bounds.Left &&
                                  player.Bounds.Left < platform.Bounds.Right;
+
+                // Check if player was above platform last frame (prevents tunneling)
                 bool landing = player.PlatformPreviousBounds.Bottom <= platform.Bounds.Top &&
                               player.Bounds.Bottom >= platform.Bounds.Top &&
                               player.Velocity.Y >= 0;
@@ -36,25 +35,20 @@ namespace MonoGameProject.Core
             }
         }
 
-        // ============================================
-        // PLAYER <-> CANNON COLLISIONS (kan erop staan)
-        // ✅ FIXED: Gebruikt cannon Position ipv Bounds voor correcte landing
-        // ============================================
-
+        // Cannons act as platforms - player can stand on them
         public void CheckPlayerCannonCollisions(Player player, List<Cannon> cannons)
         {
             foreach (var cannon in cannons)
             {
                 bool horizontal = player.Bounds.Right > cannon.Bounds.Left &&
                                  player.Bounds.Left < cannon.Bounds.Right;
+
                 bool landing = player.PlatformPreviousBounds.Bottom <= cannon.Bounds.Top &&
                               player.Bounds.Bottom >= cannon.Bounds.Top &&
                               player.Velocity.Y >= 0;
 
                 if (horizontal && landing)
                 {
-                    // ✅ FIX: Gebruik cannon.Position.Y (visuele top) ipv Bounds.Top
-                    // Cannon is 48*2 = 96 pixels hoog, player sprite offset is 90
                     player.Position = new Vector2(player.Position.X, cannon.Position.Y - 120);
                     player.Velocity = new Vector2(player.Velocity.X, 0);
                     player.SetGrounded(true);
@@ -62,10 +56,7 @@ namespace MonoGameProject.Core
             }
         }
 
-        // ============================================
-        // PLAYER <-> ENEMY COLLISIONS
-        // ============================================
-
+        // Three collision types: Stomp (head), Attack (weapon), Touch (body)
         public void CheckPlayerEnemyCollisions(Player player, List<Enemy> enemies)
         {
             foreach (var enemy in enemies)
@@ -74,18 +65,18 @@ namespace MonoGameProject.Core
 
                 bool playerStomped = false;
 
-                // Check STOMP collision (van boven op hoofd springen)
+                // Check stomp collision (Mario-style)
                 if (enemy.CanBeStomped && player.Velocity.Y > 0)
                 {
                     playerStomped = CheckStompCollision(player, enemy);
                 }
                 else if (!enemy.CanBeStomped && player.Velocity.Y > 0)
                 {
-                    // Player probeert te stompen op armored enemy = damage aan player
+                    // Armored enemies damage player on stomp attempt
                     CheckArmoredStompAttempt(player, enemy);
                 }
 
-                // Check ATTACK collision
+                // Check attack hitbox collision
                 if (!playerStomped && player.AttackHitbox != Rectangle.Empty &&
                     !player.AttackHitEnemies.Contains(enemy) &&
                     player.AttackHitbox.Intersects(enemy.Bounds))
@@ -94,7 +85,7 @@ namespace MonoGameProject.Core
                     player.AttackHitEnemies.Add(enemy);
                 }
 
-                // Check TOUCH collision (body contact = damage aan player)
+                // Check body contact collision
                 if (!playerStomped && player.Bounds.Intersects(enemy.Bounds))
                 {
                     player.TakeDamage(20);
@@ -102,6 +93,7 @@ namespace MonoGameProject.Core
             }
         }
 
+        // Stomp requires X/Y overlap and from-above check
         private bool CheckStompCollision(Player player, Enemy enemy)
         {
             int xOverlap = Math.Min(player.Bounds.Right, enemy.HeadHitbox.Right) -
@@ -132,14 +124,10 @@ namespace MonoGameProject.Core
 
             if (xOverlap > 10 && yOverlap > 0 && fromAbove)
             {
-                player.TakeDamage(15); // Player krijgt damage bij stompen op armor
+                player.TakeDamage(15);
                 player.Velocity = new Vector2(player.Velocity.X, -200f);
             }
         }
-
-        // ============================================
-        // PLAYER <-> SPIKE COLLISIONS
-        // ============================================
 
         public void CheckPlayerSpikeCollisions(Player player, List<SpikeTrap> spikes)
         {
@@ -152,14 +140,11 @@ namespace MonoGameProject.Core
             }
         }
 
-        // ============================================
-        // PLAYER <-> CANNONBALL COLLISIONS
-        // ============================================
-
         public void CheckPlayerCannonBallCollisions(Player player, List<Cannon> cannons)
         {
             foreach (var cannon in cannons)
             {
+                // Iterate backwards for safe removal during loop
                 for (int i = cannon.CannonBalls.Count - 1; i >= 0; i--)
                 {
                     var ball = cannon.CannonBalls[i];
@@ -174,10 +159,7 @@ namespace MonoGameProject.Core
             }
         }
 
-        // ============================================
-        // ENEMY <-> PLATFORM COLLISIONS
-        // ============================================
-
+        // Delegate platform collision to enemies themselves
         public void CheckEnemyPlatformCollisions(List<Enemy> enemies, List<Platform> platforms)
         {
             foreach (var enemy in enemies)
@@ -186,24 +168,18 @@ namespace MonoGameProject.Core
             }
         }
 
-        // ============================================
-        // BOSS <-> PLAYER COLLISIONS (Instant Kill)
-        // ============================================
-
+        // Boss contact = instant kill (game design choice)
         public void CheckBossPlayerCollision(Player player, FlyingBoss boss)
         {
             if (!boss.IsAlive) return;
 
             if (player.Bounds.Intersects(boss.Bounds))
             {
-                player.TakeDamage(999); // Instant kill
+                player.TakeDamage(999);
             }
         }
 
-        // ============================================
-        // BOSS <-> CANNONBALL COLLISIONS
-        // ============================================
-
+        // Boss can only be damaged by cannonballs
         public void CheckBossCannonBallCollisions(FlyingBoss boss, List<Cannon> cannons)
         {
             if (!boss.IsAlive) return;

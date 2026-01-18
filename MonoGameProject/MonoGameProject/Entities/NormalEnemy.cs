@@ -4,9 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace MonoGameProject.Entities
 {
     /// <summary>
-    /// Normale enemy waarop je kan springen om damage te doen
-    /// Gebruikt: Enemy1Run.png en Enemy1Dead.png
-    /// Volgt SOLID: Liskov Substitution Principle - kan overal gebruikt worden waar Enemy verwacht wordt
+    /// Standard enemy - can be stomped for damage
     /// </summary>
     public class NormalEnemy : Enemy
     {
@@ -40,15 +38,9 @@ namespace MonoGameProject.Entities
             }
         }
 
-        protected override float GetGroundOffset()
-        {
-            return 95f;
-        }
-
-        // Deze enemy KAN gestomped worden
+        protected override float GetGroundOffset() => 95f;
         public override bool CanBeStomped => true;
 
-        // Wanneer je op zijn hoofd springt, neemt hij schade
         public void HandleStompDamage(int damage = 20)
         {
             TakeDamage(damage);

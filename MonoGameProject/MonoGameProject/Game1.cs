@@ -2,10 +2,13 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameProject.Core;
 using MonoGameProject.Scenes;
-using System;
 
 namespace MonoGameProject
 {
+    /// <summary>
+    /// Main game class - entry point for MonoGame
+    /// Handles initialization, content loading, and game loop
+    /// </summary>
     public class Game1 : Game
     {
         private GraphicsDeviceManager _graphics;
@@ -23,6 +26,7 @@ namespace MonoGameProject
         {
             TextureFactory.Init(GraphicsDevice);
             _sceneManager = new SceneManager();
+
             base.Initialize();
         }
 
@@ -30,9 +34,7 @@ namespace MonoGameProject
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // ✅ NIEUW: Laad alle muziek (3 tracks)
             MusicHelper.LoadAllMusic(Content);
-
             _sceneManager.ChangeScene(new StartScene(Content, _sceneManager, this));
         }
 
@@ -45,9 +47,11 @@ namespace MonoGameProject
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+
             _spriteBatch.Begin();
             _sceneManager.Draw(_spriteBatch);
             _spriteBatch.End();
+
             base.Draw(gameTime);
         }
     }

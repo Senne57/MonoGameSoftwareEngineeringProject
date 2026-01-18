@@ -3,6 +3,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoGameProject.Core
 {
+    /// <summary>
+    /// Manages scene transitions and current active scene
+    /// Works with IScene interface for flexibility
+    /// </summary>
     public class SceneManager
     {
         private IScene _currentScene;

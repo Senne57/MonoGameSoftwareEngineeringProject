@@ -3,6 +3,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoGameProject.Components
 {
+    /// <summary>
+    /// Frame-based sprite animation
+    /// Supports looping and freeze-frame options
+    /// </summary>
     public class Animation
     {
         private Texture2D _texture;
@@ -12,6 +16,8 @@ namespace MonoGameProject.Components
         private float _timer;
         private bool _loop;
         private bool _freezeLastFrame;
+
+        public int CurrentFrame => _currentFrame;
 
         public Animation(Texture2D texture, int frameCount, float frameTime, bool loop = true, bool freezeLastFrame = false)
         {
@@ -24,24 +30,28 @@ namespace MonoGameProject.Components
             _timer = 0f;
         }
 
-        public int CurrentFrame => _currentFrame; // ⬅ hier toevoegen
-
         public void Update(GameTime gameTime)
         {
-            if (_freezeLastFrame && _currentFrame == _frameCount - 1) return;
+            if (_freezeLastFrame && _currentFrame == _frameCount - 1)
+                return;
 
             _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             if (_timer >= _frameTime)
             {
                 _timer = 0f;
                 _currentFrame++;
+
                 if (_currentFrame >= _frameCount)
                 {
-                    if (_loop) _currentFrame = 0;
+                    if (_loop)
+                        _currentFrame = 0;
                     else
                     {
-                        if (_freezeLastFrame) _currentFrame = _frameCount - 1;
-                        else _currentFrame = 0;
+                        if (_freezeLastFrame)
+                            _currentFrame = _frameCount - 1;
+                        else
+                            _currentFrame = 0;
                     }
                 }
             }
@@ -56,8 +66,15 @@ namespace MonoGameProject.Components
         public void Draw(SpriteBatch sb, Vector2 position, SpriteEffects flip)
         {
             int frameWidth = _texture.Width / _frameCount;
-            sb.Draw(_texture, position, new Rectangle(frameWidth * _currentFrame, 0, frameWidth, _texture.Height), Color.White, 0f, Vector2.Zero, 1f, flip, 0f);
+
+            Rectangle sourceRect = new Rectangle(
+                frameWidth * _currentFrame,
+                0,
+                frameWidth,
+                _texture.Height
+            );
+
+            sb.Draw(_texture, position, sourceRect, Color.White, 0f, Vector2.Zero, 1f, flip, 0f);
         }
     }
-
 }

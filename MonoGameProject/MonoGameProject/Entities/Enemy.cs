@@ -7,8 +7,8 @@ using System.Collections.Generic;
 namespace MonoGameProject.Entities
 {
     /// <summary>
-    /// Abstract base class voor alle enemy types
-    /// Volgt SOLID principes: Single Responsibility en Open/Closed
+    /// Abstract base class for all enemy types
+    /// Subclasses must implement their own hitboxes and behaviors
     /// </summary>
     public abstract class Enemy : Entity
     {
@@ -23,11 +23,9 @@ namespace MonoGameProject.Entities
         protected float _speed = 80f;
         protected bool _facingRight = true;
 
-        // Abstract properties - elke enemy type implementeert zijn eigen hitboxes
+        // Subclasses define their own collision boxes
         public abstract Rectangle Bounds { get; }
         public abstract Rectangle HeadHitbox { get; }
-
-        // Template method - bepaalt of deze enemy gestomped kan worden
         public abstract bool CanBeStomped { get; }
 
         protected Enemy(Texture2D runTexture, Texture2D deathTexture, Vector2 startPos)
@@ -45,10 +43,9 @@ namespace MonoGameProject.Entities
                 return;
             }
 
-            // ✅ FIX: Vervang hele Velocity property voor X component
             Velocity = new Vector2(_speed, Velocity.Y);
 
-            // Patrol beweging
+            // Simple patrol AI
             if (Position.X < 100)
             {
                 _speed = 80f;
@@ -60,7 +57,6 @@ namespace MonoGameProject.Entities
                 _facingRight = false;
             }
 
-            // Gebruik Entity helper methods
             ApplyGravity(Gravity, gameTime);
             ApplyVelocity(gameTime);
 
@@ -74,21 +70,20 @@ namespace MonoGameProject.Entities
                 bool horizontal =
                     Bounds.Right > p.Bounds.Left &&
                     Bounds.Left < p.Bounds.Right;
+
                 if (horizontal &&
                     Bounds.Bottom >= p.Bounds.Top &&
                     Velocity.Y >= 0)
                 {
-                    // ✅ FIX: Vervang hele Position en Velocity properties
                     Position = new Vector2(Position.X, p.Bounds.Top - GetGroundOffset());
                     Velocity = new Vector2(Velocity.X, 0);
                 }
             }
         }
 
-        // Template method - subclasses bepalen hun eigen ground offset
         protected abstract float GetGroundOffset();
 
-        // Virtual method - kan worden override voor speciale damage handling
+        // Virtual - can be overridden for special damage handling (e.g. armor)
         public virtual void TakeDamage(int dmg)
         {
             if (_isDead) return;
@@ -114,14 +109,18 @@ namespace MonoGameProject.Entities
         {
             if (_facingRight)
             {
-                sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X + 30, (int)Position.Y + 30, 48, 5), Color.Red);
+                sb.Draw(TextureFactory.Pixel,
+                    new Rectangle((int)Position.X + 30, (int)Position.Y + 30, 48, 5),
+                    Color.Red);
                 sb.Draw(TextureFactory.Pixel,
                     new Rectangle((int)Position.X + 30, (int)Position.Y + 30, (int)(48 * (HP / (float)MaxHP)), 5),
                     Color.Lime);
             }
             else
             {
-                sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X + 50, (int)Position.Y + 30, 48, 5), Color.Red);
+                sb.Draw(TextureFactory.Pixel,
+                    new Rectangle((int)Position.X + 50, (int)Position.Y + 30, 48, 5),
+                    Color.Red);
                 sb.Draw(TextureFactory.Pixel,
                     new Rectangle((int)Position.X + 50, (int)Position.Y + 30, (int)(48 * (HP / (float)MaxHP)), 5),
                     Color.Lime);

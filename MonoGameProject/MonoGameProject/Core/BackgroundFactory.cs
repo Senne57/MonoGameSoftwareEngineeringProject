@@ -5,29 +5,23 @@ using System.Collections.Generic;
 namespace MonoGameProject.Core
 {
     /// <summary>
-    /// Factory voor het creëren van backgrounds
-    /// Volgt SOLID: Dependency Inversion - scenes zijn niet afhankelijk van concrete background types
+    /// Factory for creating different background types
+    /// Centralizes background creation logic
     /// </summary>
     public static class BackgroundFactory
     {
-        /// <summary>
-        /// Creëer animated background voor menu screens
-        /// </summary>
         public static Background CreateAnimatedBackground(
             ContentManager content,
             string textureName,
             int frameCount,
             int mapWidth = 800,
             int mapHeight = 480,
-            float scale = 1.0f) // ✅ Optionele scale parameter
+            float scale = 1.0f)
         {
             Texture2D texture = content.Load<Texture2D>(textureName);
             return new AnimatedBackground(texture, frameCount, mapWidth, mapHeight, scale);
         }
 
-        /// <summary>
-        /// Creëer layered background voor levels
-        /// </summary>
         public static Background CreateLayeredBackground(
             ContentManager content,
             string[] layerNames,
@@ -39,12 +33,11 @@ namespace MonoGameProject.Core
             {
                 layers.Add(content.Load<Texture2D>(layerName));
             }
+
             return new LayeredBackground(layers, mapWidth, mapHeight);
         }
 
-        /// <summary>
-        /// Helper methods voor specifieke levels
-        /// </summary>
+        // Convenience methods for each level
         public static Background CreateLevel1Background(ContentManager content, int mapWidth, int mapHeight)
         {
             return CreateLayeredBackground(
@@ -75,19 +68,16 @@ namespace MonoGameProject.Core
             );
         }
 
-        // ✅ Start screen met kleinere scale (70%)
         public static Background CreateStartBackground(ContentManager content)
         {
             return CreateAnimatedBackground(content, "Start", 36, scale: 0.7f);
         }
 
-        // ✅ GameOver blijft volledig scherm (100%)
         public static Background CreateGameOverBackground(ContentManager content)
         {
             return CreateAnimatedBackground(content, "GameOver", 36, scale: 1.0f);
         }
 
-        // ✅ Victory blijft volledig scherm (100%)
         public static Background CreateVictoryBackground(ContentManager content)
         {
             return CreateAnimatedBackground(content, "Victory", 36, scale: 1.0f);

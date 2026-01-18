@@ -5,8 +5,7 @@ using MonoGameProject.Core;
 namespace MonoGameProject.Entities
 {
     /// <summary>
-    /// Armored Knight - je kan NIET op zijn hoofd springen door zijn armor
-    /// Gebruikt: Walk.png (8 frames) en DeadKnight.png (6 frames)
+    /// Armored enemy - cannot be stomped, has damage reduction
     /// </summary>
     public class ArmoredKnight : Enemy
     {
@@ -17,9 +16,8 @@ namespace MonoGameProject.Entities
             HP = 100;
             _speed = 60f;
 
-            // ✅ FIX: Correcte frame counts
-            _run = new MonoGameProject.Components.Animation(runTexture, 8, 0.1f);  // 8 frames
-            _death = new MonoGameProject.Components.Animation(deathTexture, 6, 0.15f, loop: false, freezeLastFrame: true); // 6 frames
+            _run = new MonoGameProject.Components.Animation(runTexture, 8, 0.1f);
+            _death = new MonoGameProject.Components.Animation(deathTexture, 6, 0.15f, loop: false, freezeLastFrame: true);
         }
 
         public override Rectangle Bounds
@@ -44,18 +42,17 @@ namespace MonoGameProject.Entities
             }
         }
 
-        protected override float GetGroundOffset()
-        {
-            return 100f;
-        }
-
+        protected override float GetGroundOffset() => 100f;
         public override bool CanBeStomped => false;
 
+        // 30% damage reduction from armor
         public override void TakeDamage(int dmg)
         {
             if (_isDead) return;
+
             int reducedDamage = (int)(dmg * 0.7f);
             HP -= reducedDamage;
+
             if (HP <= 0)
                 _isDead = true;
         }
@@ -64,14 +61,18 @@ namespace MonoGameProject.Entities
         {
             if (_facingRight)
             {
-                sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X + 10, (int)Position.Y + 45, 48, 5), Color.DarkRed);
+                sb.Draw(TextureFactory.Pixel,
+                    new Rectangle((int)Position.X + 10, (int)Position.Y + 45, 48, 5),
+                    Color.DarkRed);
                 sb.Draw(TextureFactory.Pixel,
                     new Rectangle((int)Position.X + 10, (int)Position.Y + 45, (int)(48 * (HP / (float)MaxHP)), 5),
                     Color.Orange);
             }
             else
             {
-                sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X + 70, (int)Position.Y + 45, 48, 5), Color.DarkRed);
+                sb.Draw(TextureFactory.Pixel,
+                    new Rectangle((int)Position.X + 70, (int)Position.Y + 45, 48, 5),
+                    Color.DarkRed);
                 sb.Draw(TextureFactory.Pixel,
                     new Rectangle((int)Position.X + 70, (int)Position.Y + 45, (int)(48 * (HP / (float)MaxHP)), 5),
                     Color.Orange);

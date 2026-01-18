@@ -8,18 +8,25 @@ using System.Collections.Generic;
 
 namespace MonoGameProject.Entities
 {
+    /// <summary>
+    /// Player character - extends Entity base class
+    /// Handles player input, animations, and state management
+    /// </summary>
     public class Player : Entity
     {
         private Animation _idle, _run, _jump, _attack;
         private Animation _current;
+
         private const float Speed = 220f;
         private const float JumpForce = -520f;
         private const float Gravity = 1100f;
+        private const float AttackDuration = 0.25f;
+        private const float InvincibilityDuration = 1.5f;
+
         private bool _isGrounded;
         private bool _isAttacking;
         private bool _facingRight = true;
         private float _attackTimer;
-        private const float AttackDuration = 0.25f;
         private Vector2 _previousPosition;
         private HashSet<Enemy> _attackHitEnemies = new HashSet<Enemy>();
 
@@ -28,20 +35,19 @@ namespace MonoGameProject.Entities
         public int Lives = 3;
         public bool IsInvincible { get; private set; }
         private float _invincibilityTimer;
-        private const float InvincibilityDuration = 1.5f;
         private float _flickerTimer;
 
-        // ✅ Override Bounds from Entity
-        public override Rectangle Bounds => new Rectangle((int)Position.X + 40, (int)Position.Y + 45, 45, 85);
+        public override Rectangle Bounds =>
+            new Rectangle((int)Position.X + 40, (int)Position.Y + 45, 45, 85);
 
-        public Rectangle PreviousBounds => new Rectangle((int)_previousPosition.X + 40, (int)_previousPosition.Y + 45, 45, 85);
+        public Rectangle PreviousBounds =>
+            new Rectangle((int)_previousPosition.X + 40, (int)_previousPosition.Y + 45, 45, 85);
 
-        // ✅ NIEUW: Public voor CollisionManager
-        public Rectangle PlatformPreviousBounds => new Rectangle((int)_previousPosition.X, (int)_previousPosition.Y, 48, 64);
+        public Rectangle PlatformPreviousBounds =>
+            new Rectangle((int)_previousPosition.X, (int)_previousPosition.Y, 48, 64);
 
         public HashSet<Enemy> AttackHitEnemies => _attackHitEnemies;
 
-        // ✅ NIEUW: Methode voor CollisionManager om grounded state te zetten
         public void SetGrounded(bool grounded)
         {
             _isGrounded = grounded;
@@ -64,6 +70,7 @@ namespace MonoGameProject.Entities
             _previousPosition = Position;
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            // Handle invincibility frames
             if (IsInvincible)
             {
                 _invincibilityTimer -= dt;
@@ -74,19 +81,28 @@ namespace MonoGameProject.Entities
 
             KeyboardState k = Keyboard.GetState();
 
-            // ✅ FIX: Vervang hele Velocity property voor X component
+            // Movement input - supports both QWERTY and arrow keys
             float velocityX = 0;
-            if (k.IsKeyDown(Keys.Q)) { velocityX = -Speed; _facingRight = false; }
-            if (k.IsKeyDown(Keys.D)) { velocityX = Speed; _facingRight = true; }
+            if (k.IsKeyDown(Keys.Q) || k.IsKeyDown(Keys.Left))
+            {
+                velocityX = -Speed;
+                _facingRight = false;
+            }
+            if (k.IsKeyDown(Keys.D) || k.IsKeyDown(Keys.Right))
+            {
+                velocityX = Speed;
+                _facingRight = true;
+            }
             Velocity = new Vector2(velocityX, Velocity.Y);
 
-            // ✅ FIX: Jump - vervang hele Velocity property
-            if (k.IsKeyDown(Keys.Z) && _isGrounded)
+            // Jump input - only when grounded
+            if ((k.IsKeyDown(Keys.Z) || k.IsKeyDown(Keys.Up)) && _isGrounded)
             {
                 Velocity = new Vector2(Velocity.X, JumpForce);
                 _isGrounded = false;
             }
 
+            // Attack input
             if (k.IsKeyDown(Keys.E) && !_isAttacking)
             {
                 _isAttacking = true;
@@ -99,30 +115,35 @@ namespace MonoGameProject.Entities
             {
                 _attack.Update(gameTime);
                 _attackTimer -= dt;
-                if (_attackTimer <= 0) _isAttacking = false;
+                if (_attackTimer <= 0)
+                    _isAttacking = false;
             }
 
-            // ✅ Gebruik Entity helper methods
             ApplyGravity(Gravity, gameTime);
             ApplyVelocity(gameTime);
 
-            if (_isAttacking) _current = _attack;
-            else if (!_isGrounded) _current = _jump;
-            else if (Velocity.X != 0) _current = _run;
-            else _current = _idle;
+            // Animation state selection
+            if (_isAttacking)
+                _current = _attack;
+            else if (!_isGrounded)
+                _current = _jump;
+            else if (Velocity.X != 0)
+                _current = _run;
+            else
+                _current = _idle;
 
             _current.Update(gameTime);
         }
 
         public void HandlePlatformCollision(List<Platform> platforms)
         {
-            // ⚠️ DEPRECATED: Gebruik CollisionManager.CheckPlayerPlatformCollisions() in plaats daarvan
-            // Deze methode blijft bestaan voor backwards compatibility
+            // Deprecated - use CollisionManager.CheckPlayerPlatformCollisions() instead
             _isGrounded = false;
             foreach (var p in platforms)
             {
                 bool horizontal = Bounds.Right > p.Bounds.Left && Bounds.Left < p.Bounds.Right;
-                bool landing = PlatformPreviousBounds.Bottom <= p.Bounds.Top && Bounds.Bottom >= p.Bounds.Top && Velocity.Y >= 0;
+                bool landing = PlatformPreviousBounds.Bottom <= p.Bounds.Top &&
+                              Bounds.Bottom >= p.Bounds.Top && Velocity.Y >= 0;
                 if (horizontal && landing)
                 {
                     Position = new Vector2(Position.X, p.Bounds.Top - 90);
@@ -157,30 +178,44 @@ namespace MonoGameProject.Entities
             Velocity = Vector2.Zero;
             IsInvincible = true;
             _invincibilityTimer = InvincibilityDuration;
-            _flickerTimer = 0; // ✅ Reset flicker timer ook
+            _flickerTimer = 0;
         }
 
+        // Attack hitbox is only active during specific frames of attack animation
         public Rectangle AttackHitbox
         {
             get
             {
                 if (!_isAttacking) return Rectangle.Empty;
                 if (_attack.CurrentFrame < 2) return Rectangle.Empty;
-                return new Rectangle(_facingRight ? Bounds.Right : Bounds.Left - 28, Bounds.Top + 12, 28, 40);
+
+                return new Rectangle(
+                    _facingRight ? Bounds.Right : Bounds.Left - 28,
+                    Bounds.Top + 12,
+                    28,
+                    40
+                );
             }
         }
 
         public override void Draw(SpriteBatch sb)
         {
+            // Flicker effect during invincibility
             if (IsInvincible && (int)(_flickerTimer * 10) % 2 == 0)
                 return;
 
             SpriteEffects flip = _facingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
             _current.Draw(sb, Position, flip);
 
-            sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X, (int)Position.Y - 10, 48, 5), Color.Red);
-            sb.Draw(TextureFactory.Pixel, new Rectangle((int)Position.X, (int)Position.Y - 10, (int)(48 * (HP / (float)MaxHP)), 5), Color.Lime);
+            // Health bar
+            sb.Draw(TextureFactory.Pixel,
+                new Rectangle((int)Position.X, (int)Position.Y - 10, 48, 5),
+                Color.Red);
+            sb.Draw(TextureFactory.Pixel,
+                new Rectangle((int)Position.X, (int)Position.Y - 10, (int)(48 * (HP / (float)MaxHP)), 5),
+                Color.Lime);
 
+            // Debug hitbox
             sb.Draw(TextureFactory.Pixel, Bounds, Color.Lime * 0.3f);
         }
     }

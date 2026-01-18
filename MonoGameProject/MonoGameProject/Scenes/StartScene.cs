@@ -21,16 +21,12 @@ namespace MonoGameProject.Scenes
             _game = game;
             _font = content.Load<SpriteFont>("DefaultFont");
 
-            // Creëer animated background via Factory
             _background = BackgroundFactory.CreateStartBackground(content);
-
-            // ✅ NIEUW: Start menu muziek
             MusicManager.Instance.Play(MusicHelper.MusicNames.Menu, repeat: true);
         }
 
         public void Update(GameTime gameTime)
         {
-            // Update background animatie
             _background.Update(gameTime);
 
             if (Keyboard.GetState().IsKeyDown(Keys.Enter))
@@ -41,15 +37,20 @@ namespace MonoGameProject.Scenes
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            // Teken background EERST (achter alle UI)
             _background.Draw(spriteBatch);
 
-
-            // UI tekenen
             spriteBatch.DrawString(_font, "Controls:", new Vector2(5, 5), Color.White);
-            spriteBatch.DrawString(_font, "Q/D = Move Left/Right", new Vector2(5, 25), Color.White);
-            spriteBatch.DrawString(_font, "Z = Jump", new Vector2(5, 45), Color.White);
-            spriteBatch.DrawString(_font, "E = Attack", new Vector2(5, 65), Color.White);
+            spriteBatch.DrawString(_font, "Q/Left Arrow = Move Left", new Vector2(5, 25), Color.White);
+            spriteBatch.DrawString(_font, "D/Right Arrow = Move Right", new Vector2(5, 45), Color.White);
+            spriteBatch.DrawString(_font, "Z/Up Arrow = Jump", new Vector2(5, 65), Color.White);
+            spriteBatch.DrawString(_font, "E = Attack", new Vector2(5, 85), Color.White);
+            spriteBatch.DrawString(_font, "R = Respawn (when dead)", new Vector2(5, 105), Color.White);
+
+            string startText = "Press ENTER to Start";
+            Vector2 textSize = _font.MeasureString(startText);
+            spriteBatch.DrawString(_font, startText,
+                new Vector2(400 - textSize.X / 2, 400),
+                Color.Yellow);
         }
     }
 }
