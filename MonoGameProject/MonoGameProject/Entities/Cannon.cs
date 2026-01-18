@@ -13,20 +13,28 @@ namespace MonoGameProject.Entities
         private Vector2 _shootDirection;
         private bool _facingRight;
         private const float Scale = 2.0f;
+        private int _ballDamage; // ✅ NIEUW: Custom damage per cannon
 
         public List<CannonBall> CannonBalls = new List<CannonBall>();
 
         // ✅ Override Bounds from Entity base class
+        // Pas deze waardes aan voor betere collision!
         public override Rectangle Bounds =>
-            new Rectangle((int)Position.X, (int)Position.Y, (int)(48 * Scale), (int)(48 * Scale));
+            new Rectangle(
+                (int)Position.X - 4,        // X offset - schuif naar rechts
+                (int)Position.Y - 4,        // Y offset - schuif naar beneden
+                (int)(48 * Scale) - 25,      // Breedte - maak smaller
+                (int)(48 * Scale) - 25       // Hoogte - maak korter
+            );
 
-        public Cannon(Texture2D cannonTex, Texture2D ballTex, Vector2 position, Vector2 shootDirection)
+        public Cannon(Texture2D cannonTex, Texture2D ballTex, Vector2 position, Vector2 shootDirection, int ballDamage = 25)
         {
             _cannonTexture = cannonTex;
             _ballTexture = ballTex;
             Position = position;
             _shootDirection = Vector2.Normalize(shootDirection);
             _shootTimer = _shootInterval;
+            _ballDamage = ballDamage; // ✅ Sla custom damage op
 
             if (_shootDirection.X > 0)
                 _facingRight = false;
@@ -59,9 +67,10 @@ namespace MonoGameProject.Entities
             float centerY = Position.Y + (48 * Scale / 2f);
             float offsetX = _shootDirection.X * (48 * Scale / 2f) - 50;
             float offsetY = _shootDirection.Y * (48 * Scale / 2f) - 50;
-
             Vector2 spawnPos = new Vector2(centerX + offsetX, centerY + offsetY);
-            CannonBalls.Add(new CannonBall(_ballTexture, spawnPos, _shootDirection));
+
+            // ✅ Geef custom damage mee aan cannonball
+            CannonBalls.Add(new CannonBall(_ballTexture, spawnPos, _shootDirection, _ballDamage));
         }
 
         public override void Draw(SpriteBatch sb)

@@ -14,6 +14,7 @@ namespace MonoGameProject.Scenes
         private Game _game;
         private bool _isVictory;
         private KeyboardState _previousKeyState;
+        private Background _background; // ✅ SOLID: Dependency op abstractie
 
         public GameOverScene(ContentManager content, SceneManager sceneManager, Game game, bool victory)
         {
@@ -22,10 +23,19 @@ namespace MonoGameProject.Scenes
             _game = game;
             _isVictory = victory;
             _font = content.Load<SpriteFont>("DefaultFont");
+
+            // ✅ Creëer juiste background via Factory
+            if (_isVictory)
+                _background = BackgroundFactory.CreateVictoryBackground(content);
+            else
+                _background = BackgroundFactory.CreateGameOverBackground(content);
         }
 
         public void Update(GameTime gameTime)
         {
+            // ✅ Update background animatie
+            _background.Update(gameTime);
+
             KeyboardState currentKeyState = Keyboard.GetState();
 
             // Restart met Enter
@@ -39,35 +49,26 @@ namespace MonoGameProject.Scenes
 
         public void Draw(SpriteBatch sb)
         {
+            // ✅ Teken background EERST
+            _background.Draw(sb);
+
             if (_isVictory)
             {
                 // WIN SCREEN
-                string title = "VICTORY!";
-                string subtitle = "You completed all levels!";
-                string restart = "Press ENTER to return to menu";
+                string restart = "Press ENTER to play again";
 
-                Vector2 titleSize = _font.MeasureString(title);
-                Vector2 subtitleSize = _font.MeasureString(subtitle);
                 Vector2 restartSize = _font.MeasureString(restart);
 
-                sb.DrawString(_font, title, new Vector2(400 - titleSize.X / 2, 150), Color.Gold);
-                sb.DrawString(_font, subtitle, new Vector2(400 - subtitleSize.X / 2, 200), Color.White);
-                sb.DrawString(_font, restart, new Vector2(400 - restartSize.X / 2, 280), Color.LightGray);
+                sb.DrawString(_font, restart, new Vector2(400 - restartSize.X / 2, 400), Color.LightGray);
             }
             else
             {
                 // LOSE SCREEN
-                string title = "GAME OVER";
-                string subtitle = "You ran out of lives...";
-                string restart = "Press ENTER to try again";
+                string restart = "Press ENTER to play again";
 
-                Vector2 titleSize = _font.MeasureString(title);
-                Vector2 subtitleSize = _font.MeasureString(subtitle);
                 Vector2 restartSize = _font.MeasureString(restart);
 
-                sb.DrawString(_font, title, new Vector2(400 - titleSize.X / 2, 150), Color.Red);
-                sb.DrawString(_font, subtitle, new Vector2(400 - subtitleSize.X / 2, 200), Color.White);
-                sb.DrawString(_font, restart, new Vector2(400 - restartSize.X / 2, 280), Color.LightGray);
+                sb.DrawString(_font, restart, new Vector2(400 - restartSize.X / 2, 400), Color.LightGray);
             }
         }
     }

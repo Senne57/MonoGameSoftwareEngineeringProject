@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameProject.Core;
 using MonoGameProject.Entities;
-using System;
 using System.Collections.Generic;
 
 namespace MonoGameProject.Scenes
@@ -21,6 +20,9 @@ namespace MonoGameProject.Scenes
         private SceneManager _sceneManager;
         private Game _game;
         private Vector2 _spawnPoint = new Vector2(100, 100);
+
+        private CollisionManager _collisionManager;
+        private Background _background; // ✅ NIEUW
 
         private const int MapWidth = 1100;
         private const int MapHeight = 480;
@@ -69,6 +71,11 @@ namespace MonoGameProject.Scenes
 
             _camera = new Camera(_graphicsDevice.Viewport);
             _camera.SetBounds(0, MapWidth, 0, MapHeight);
+
+            _collisionManager = new CollisionManager();
+
+            // ✅ NIEUW: Creëer Level 1 background
+            _background = BackgroundFactory.CreateLevel1Background(content, MapWidth, MapHeight);
         }
 
         public void Update(GameTime gameTime)
@@ -76,9 +83,11 @@ namespace MonoGameProject.Scenes
             KeyboardState currentKeyState = Keyboard.GetState();
 
             _player.Update(gameTime);
-            _player.HandlePlatformCollision(_platforms);
 
-            // ✅ FIX: Vector2 is een struct, dus moet je hele property vervangen
+            // ✅ NIEUW: Gebruik CollisionManager voor alle collisions
+            _collisionManager.CheckPlayerPlatformCollisions(_player, _platforms);
+
+            // Map boundaries
             if (_player.Position.X < 0)
                 _player.Position = new Vector2(0, _player.Position.Y);
             if (_player.Position.X > MapWidth - _player.Bounds.Width)
@@ -89,64 +98,15 @@ namespace MonoGameProject.Scenes
 
             _camera.Follow(_player.Position);
 
+            // Update alle enemies
             foreach (var enemy in _enemies)
             {
                 enemy.Update(gameTime);
-                enemy.HandlePlatformCollision(_platforms);
-
-                if (!enemy.IsAlive) continue;
-
-                bool playerStomped = false;
-
-                // ✅ UPDATED: Check CanBeStomped property
-                if (enemy.CanBeStomped && _player.Velocity.Y > 0)
-                {
-                    int xOverlap = Math.Min(_player.Bounds.Right, enemy.HeadHitbox.Right) -
-                                   Math.Max(_player.Bounds.Left, enemy.HeadHitbox.Left);
-                    int yOverlap = Math.Min(_player.Bounds.Bottom, enemy.HeadHitbox.Bottom) -
-                                   Math.Max(_player.Bounds.Top, enemy.HeadHitbox.Top);
-                    bool fromAbove = _player.PreviousBounds.Bottom <= enemy.HeadHitbox.Top + 5;
-
-                    if (xOverlap > 10 && yOverlap > 0 && fromAbove)
-                    {
-                        // ✅ UPDATED: Type-safe stomp handling
-                        if (enemy is NormalEnemy normalEnemy)
-                        {
-                            normalEnemy.HandleStompDamage(20);
-                            // ✅ FIX: Vervang hele Velocity property (Vector2 is struct)
-                            _player.Velocity = new Vector2(_player.Velocity.X, -300f);
-                            playerStomped = true;
-                        }
-                    }
-                }
-                else if (!enemy.CanBeStomped && _player.Velocity.Y > 0)
-                {
-                    // ✅ NIEUW: Player probeert te stompen op armored knight = damage
-                    int xOverlap = Math.Min(_player.Bounds.Right, enemy.HeadHitbox.Right) -
-                                   Math.Max(_player.Bounds.Left, enemy.HeadHitbox.Left);
-                    int yOverlap = Math.Min(_player.Bounds.Bottom, enemy.HeadHitbox.Bottom) -
-                                   Math.Max(_player.Bounds.Top, enemy.HeadHitbox.Top);
-                    bool fromAbove = _player.PreviousBounds.Bottom <= enemy.HeadHitbox.Top + 5;
-
-                    if (xOverlap > 10 && yOverlap > 0 && fromAbove)
-                    {
-                        _player.TakeDamage(15); // Player krijgt damage bij stompen op armor
-                        // ✅ FIX: Vervang hele Velocity property (Vector2 is struct)
-                        _player.Velocity = new Vector2(_player.Velocity.X, -200f);
-                    }
-                }
-
-                if (!playerStomped && _player.AttackHitbox != Rectangle.Empty &&
-                    !_player.AttackHitEnemies.Contains(enemy) &&
-                    _player.AttackHitbox.Intersects(enemy.Bounds))
-                {
-                    enemy.TakeDamage(10);
-                    _player.AttackHitEnemies.Add(enemy);
-                }
-
-                if (!playerStomped && _player.Bounds.Intersects(enemy.Bounds))
-                    _player.TakeDamage(20);
             }
+
+            // ✅ NIEUW: Gebruik CollisionManager voor enemy collisions
+            _collisionManager.CheckEnemyPlatformCollisions(_enemies, _platforms);
+            _collisionManager.CheckPlayerEnemyCollisions(_player, _enemies);
 
             if (_player.HP <= 0)
             {
@@ -184,6 +144,9 @@ namespace MonoGameProject.Scenes
             sb.End();
             sb.Begin(transformMatrix: _camera.Transform);
 
+            // ✅ Teken background EERST (met camera transform)
+            _background.Draw(sb, _camera.Transform);
+
             foreach (var p in _platforms)
                 p.Draw(sb);
             foreach (var e in _enemies)
@@ -194,6 +157,7 @@ namespace MonoGameProject.Scenes
             sb.Begin();
 
             sb.DrawString(_font, $"Lives: {_player.Lives}", new Vector2(10, 10), Color.White);
+            sb.DrawString(_font, "LEVEL 1", new Vector2(10, 30), Color.Yellow);
 
             if (_player.HP <= 0 && _player.Lives > 0)
             {

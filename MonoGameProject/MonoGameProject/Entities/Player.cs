@@ -36,9 +36,16 @@ namespace MonoGameProject.Entities
 
         public Rectangle PreviousBounds => new Rectangle((int)_previousPosition.X + 40, (int)_previousPosition.Y + 45, 45, 85);
 
-        private Rectangle PlatformPreviousBounds => new Rectangle((int)_previousPosition.X, (int)_previousPosition.Y, 48, 64);
+        // ✅ NIEUW: Public voor CollisionManager
+        public Rectangle PlatformPreviousBounds => new Rectangle((int)_previousPosition.X, (int)_previousPosition.Y, 48, 64);
 
         public HashSet<Enemy> AttackHitEnemies => _attackHitEnemies;
+
+        // ✅ NIEUW: Methode voor CollisionManager om grounded state te zetten
+        public void SetGrounded(bool grounded)
+        {
+            _isGrounded = grounded;
+        }
 
         public Player(Texture2D idle, Texture2D run, Texture2D jump, Texture2D attack, Vector2 start)
         {
@@ -109,6 +116,8 @@ namespace MonoGameProject.Entities
 
         public void HandlePlatformCollision(List<Platform> platforms)
         {
+            // ⚠️ DEPRECATED: Gebruik CollisionManager.CheckPlayerPlatformCollisions() in plaats daarvan
+            // Deze methode blijft bestaan voor backwards compatibility
             _isGrounded = false;
             foreach (var p in platforms)
             {
@@ -116,7 +125,6 @@ namespace MonoGameProject.Entities
                 bool landing = PlatformPreviousBounds.Bottom <= p.Bounds.Top && Bounds.Bottom >= p.Bounds.Top && Velocity.Y >= 0;
                 if (horizontal && landing)
                 {
-                    // ✅ FIX: Vervang hele Position en Velocity properties
                     Position = new Vector2(Position.X, p.Bounds.Top - 90);
                     Velocity = new Vector2(Velocity.X, 0);
                     _isGrounded = true;
@@ -149,6 +157,7 @@ namespace MonoGameProject.Entities
             Velocity = Vector2.Zero;
             IsInvincible = true;
             _invincibilityTimer = InvincibilityDuration;
+            _flickerTimer = 0; // ✅ Reset flicker timer ook
         }
 
         public Rectangle AttackHitbox

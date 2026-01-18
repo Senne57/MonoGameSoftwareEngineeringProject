@@ -9,7 +9,7 @@ namespace MonoGameProject.Entities
         private Texture2D _texture;
         private float _speed = 200f;
         private Vector2 _direction;
-        public int Damage = 25;
+        public int Damage; // ✅ Niet meer const - kan nu per cannonball verschillen
         public bool IsActive = true;
         private bool _isExploding = false;
         private int _currentFrame = 0;
@@ -19,13 +19,14 @@ namespace MonoGameProject.Entities
 
         // ✅ Override Bounds from Entity base class
         public override Rectangle Bounds =>
-            new Rectangle((int)Position.X, (int)Position.Y, 16, 16);
+            new Rectangle((int)Position.X + 18, (int)Position.Y + 18, 16, 16);
 
-        public CannonBall(Texture2D texture, Vector2 startPos, Vector2 direction)
+        public CannonBall(Texture2D texture, Vector2 startPos, Vector2 direction, int damage = 25)
         {
             _texture = texture;
             Position = startPos;
             _direction = direction;
+            Damage = damage; // ✅ Custom damage
             Velocity = _direction * _speed;
         }
 
@@ -49,8 +50,8 @@ namespace MonoGameProject.Entities
                 // ✅ Gebruik Entity helper method
                 ApplyVelocity(gameTime);
 
-                // Deactiveer als buiten scherm
-                if (Position.X < -100 || Position.X > 2000 || Position.Y < -100 || Position.Y > 700)
+                // ✅ FIX: Ruimere boundaries voor Level3 (map is 5000 breed)
+                if (Position.X < -200 || Position.X > 5200 || Position.Y < -100 || Position.Y > 700)
                     IsActive = false;
             }
         }
@@ -72,7 +73,6 @@ namespace MonoGameProject.Entities
 
             int frameWidth = _texture.Width / TotalFrames;
             Rectangle sourceRect = new Rectangle(frameWidth * _currentFrame, 0, frameWidth, _texture.Height);
-
             sb.Draw(_texture, Position, sourceRect, Color.White);
             sb.Draw(TextureFactory.Pixel, Bounds, Color.Lime * 0.3f);
         }
