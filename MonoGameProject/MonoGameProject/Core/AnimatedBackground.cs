@@ -1,13 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGameProject.Components;
 
 namespace MonoGameProject.Core
 {
     /// <summary>
     /// Animated background voor menu screens (Start, GameOver, Victory)
     /// Gebruikt: Start.png (36 frames 6x6), GameOver.png (36 frames 6x6), Victory.png (36 frames 6x6)
-    /// Volgt SOLID: Open/Closed - extends Background zonder base te wijzigen
     /// </summary>
     public class AnimatedBackground : Background
     {
@@ -16,14 +14,17 @@ namespace MonoGameProject.Core
         private float _timer;
         private const float FrameTime = 0.1f;
         private const int TotalFrames = 36;
-        private const int FramesPerRow = 6; // ✅ 6x6 grid
+        private const int FramesPerRow = 6;
+        private float _scale; // ✅ Scale factor
 
-        public AnimatedBackground(Texture2D texture, int frameCount, int mapWidth, int mapHeight)
+        // ✅ Constructor met optionele scale parameter (default = 1.0 = volledig scherm)
+        public AnimatedBackground(Texture2D texture, int frameCount, int mapWidth, int mapHeight, float scale = 1.0f)
             : base(mapWidth, mapHeight)
         {
             _texture = texture;
             _currentFrame = 0;
             _timer = 0f;
+            _scale = scale;
         }
 
         public override void Update(GameTime gameTime)
@@ -56,10 +57,18 @@ namespace MonoGameProject.Core
                 frameHeight
             );
 
-            // Stretch over hele viewport (800x480)
+            // ✅ Bereken geschaalde afmetingen
+            int scaledWidth = (int)(800 * _scale);
+            int scaledHeight = (int)(480 * _scale);
+
+            // ✅ Centreer de geschaalde background
+            int offsetX = (800 - scaledWidth) / 2;
+            int offsetY = (480 - scaledHeight) / 2;
+
+            // Teken geschaalde en gecentreerde background
             spriteBatch.Draw(
                 _texture,
-                new Rectangle(0, 0, 800, 480),
+                new Rectangle(offsetX, offsetY, scaledWidth, scaledHeight),
                 sourceRect,
                 Color.White
             );

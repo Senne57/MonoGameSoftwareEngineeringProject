@@ -32,7 +32,7 @@ namespace MonoGameProject.Scenes
 
             if (Keyboard.GetState().IsKeyDown(Keys.Enter))
             {
-                _sceneManager.ChangeScene(new Level3Scene(_content, _game.GraphicsDevice, _sceneManager, _game));
+                _sceneManager.ChangeScene(new LevelScene(_content, _game.GraphicsDevice, _sceneManager, _game));
             }
         }
 

@@ -14,14 +14,15 @@ namespace MonoGameProject.Core
         /// Creëer animated background voor menu screens
         /// </summary>
         public static Background CreateAnimatedBackground(
-            ContentManager content, 
-            string textureName, 
+            ContentManager content,
+            string textureName,
             int frameCount,
-            int mapWidth = 800, 
-            int mapHeight = 480)
+            int mapWidth = 800,
+            int mapHeight = 480,
+            float scale = 1.0f) // ✅ Optionele scale parameter
         {
             Texture2D texture = content.Load<Texture2D>(textureName);
-            return new AnimatedBackground(texture, frameCount, mapWidth, mapHeight);
+            return new AnimatedBackground(texture, frameCount, mapWidth, mapHeight, scale);
         }
 
         /// <summary>
@@ -74,19 +75,22 @@ namespace MonoGameProject.Core
             );
         }
 
+        // ✅ Start screen met kleinere scale (70%)
         public static Background CreateStartBackground(ContentManager content)
         {
-            return CreateAnimatedBackground(content, "Start", 36);
+            return CreateAnimatedBackground(content, "Start", 36, scale: 0.7f);
         }
 
+        // ✅ GameOver blijft volledig scherm (100%)
         public static Background CreateGameOverBackground(ContentManager content)
         {
-            return CreateAnimatedBackground(content, "GameOver", 36);
+            return CreateAnimatedBackground(content, "GameOver", 36, scale: 1.0f);
         }
 
+        // ✅ Victory blijft volledig scherm (100%)
         public static Background CreateVictoryBackground(ContentManager content)
         {
-            return CreateAnimatedBackground(content, "Victory", 36);
+            return CreateAnimatedBackground(content, "Victory", 36, scale: 1.0f);
         }
     }
 }
