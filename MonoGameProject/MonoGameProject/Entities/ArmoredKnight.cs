@@ -25,9 +25,9 @@ namespace MonoGameProject.Entities
             get
             {
                 if (_facingRight)
-                    return new Rectangle((int)Position.X + 5, (int)Position.Y + 60, 55, 75);
+                    return new Rectangle((int)Position.X + 15, (int)Position.Y + 75, 40, 55);
                 else
-                    return new Rectangle((int)Position.X + 65, (int)Position.Y + 60, 55, 75);
+                    return new Rectangle((int)Position.X + 75, (int)Position.Y + 75, 40, 55);
             }
         }
 
@@ -36,9 +36,9 @@ namespace MonoGameProject.Entities
             get
             {
                 if (_facingRight)
-                    return new Rectangle((int)Position.X + 20, (int)Position.Y + 55, 22, 18);
+                    return new Rectangle((int)Position.X + 26, (int)Position.Y + 65, 15, 10);
                 else
-                    return new Rectangle((int)Position.X + 81, (int)Position.Y + 55, 22, 18);
+                    return new Rectangle((int)Position.X + 86, (int)Position.Y + 65, 15, 10);
             }
         }
 

@@ -21,9 +21,9 @@ namespace MonoGameProject.Entities
             get
             {
                 if (_facingRight)
-                    return new Rectangle((int)Position.X + 30, (int)Position.Y + 65, 45, 70);
+                    return new Rectangle((int)Position.X + 35, (int)Position.Y + 65, 35, 70);
                 else
-                    return new Rectangle((int)Position.X + 53, (int)Position.Y + 65, 45, 70);
+                    return new Rectangle((int)Position.X + 58, (int)Position.Y + 65, 35, 70);
             }
         }
 

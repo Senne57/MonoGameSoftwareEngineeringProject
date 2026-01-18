@@ -38,7 +38,7 @@ namespace MonoGameProject.Entities
         private float _flickerTimer;
 
         public override Rectangle Bounds =>
-            new Rectangle((int)Position.X + 40, (int)Position.Y + 45, 45, 85);
+            new Rectangle((int)Position.X + 48, (int)Position.Y + 45, 29, 85);
 
         public Rectangle PreviousBounds =>
             new Rectangle((int)_previousPosition.X + 40, (int)_previousPosition.Y + 45, 45, 85);

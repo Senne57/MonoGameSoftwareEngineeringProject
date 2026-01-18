@@ -37,10 +37,10 @@ namespace MonoGameProject.Entities
             get
             {
                 return new Rectangle(
-                    (int)Position.X - 5,
-                    (int)Position.Y - 5,
-                    80,
-                    80
+                    (int)Position.X ,
+                    (int)Position.Y ,
+                    64,
+                    64
                 );
             }
         }
