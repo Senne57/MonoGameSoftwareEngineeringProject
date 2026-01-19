@@ -77,7 +77,6 @@ namespace MonoGameProject.Entities
         {
             SpriteEffects flip = _facingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
             sb.Draw(_cannonTexture, Position, null, Color.White, 0f, Vector2.Zero, Scale, flip, 0f);
-            sb.Draw(MonoGameProject.Core.TextureFactory.Pixel, Bounds, Color.Green * 0.3f);
 
             foreach (var ball in CannonBalls)
                 ball.Draw(sb);

@@ -214,9 +214,6 @@ namespace MonoGameProject.Entities
             sb.Draw(TextureFactory.Pixel,
                 new Rectangle((int)Position.X, (int)Position.Y - 10, (int)(48 * (HP / (float)MaxHP)), 5),
                 Color.Lime);
-
-            // Debug hitbox
-            sb.Draw(TextureFactory.Pixel, Bounds, Color.Lime * 0.3f);
         }
     }
 }

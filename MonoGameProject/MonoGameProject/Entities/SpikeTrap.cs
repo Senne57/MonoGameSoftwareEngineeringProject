@@ -38,7 +38,6 @@ namespace MonoGameProject.Entities
             Rectangle sourceRect = new Rectangle(frameWidth * FixedFrame, 0, frameWidth, _texture.Height);
 
             sb.Draw(_texture, Position, sourceRect, Color.White);
-            sb.Draw(TextureFactory.Pixel, Bounds, Color.Lime * 0.3f);
         }
     }
 }

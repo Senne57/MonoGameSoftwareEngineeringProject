@@ -102,7 +102,6 @@ namespace MonoGameProject.Entities
             anim.Draw(sb, Position, flip);
 
             DrawHealthBar(sb);
-            DrawDebugHitboxes(sb);
         }
 
         protected virtual void DrawHealthBar(SpriteBatch sb)
@@ -125,12 +124,6 @@ namespace MonoGameProject.Entities
                     new Rectangle((int)Position.X + 50, (int)Position.Y + 30, (int)(48 * (HP / (float)MaxHP)), 5),
                     Color.Lime);
             }
-        }
-
-        protected virtual void DrawDebugHitboxes(SpriteBatch sb)
-        {
-            sb.Draw(TextureFactory.Pixel, Bounds, Color.Red * 0.3f);
-            sb.Draw(TextureFactory.Pixel, HeadHitbox, Color.Blue * 0.5f);
         }
     }
 }

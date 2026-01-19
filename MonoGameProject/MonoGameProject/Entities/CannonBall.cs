@@ -74,7 +74,6 @@ namespace MonoGameProject.Entities
             int frameWidth = _texture.Width / TotalFrames;
             Rectangle sourceRect = new Rectangle(frameWidth * _currentFrame, 0, frameWidth, _texture.Height);
             sb.Draw(_texture, Position, sourceRect, Color.White);
-            sb.Draw(TextureFactory.Pixel, Bounds, Color.Lime * 0.3f);
         }
     }
 }
