@@ -154,9 +154,6 @@ namespace MonoGameProject.Entities
 
             currentAnim.Draw(sb, Position, SpriteEffects.None);
 
-            // Debug hitbox
-            if (!_isDead)
-                sb.Draw(TextureFactory.Pixel, Bounds, Color.Purple * 0.4f);
         }
 
         // Boss doesn't use platform collision

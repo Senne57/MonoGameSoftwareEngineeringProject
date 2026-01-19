@@ -209,10 +209,10 @@ namespace MonoGameProject.Entities
 
             // Health bar
             sb.Draw(TextureFactory.Pixel,
-                new Rectangle((int)Position.X, (int)Position.Y - 10, 48, 5),
+                new Rectangle((int)Position.X + 40, (int)Position.Y + 25, 48, 5),
                 Color.Red);
             sb.Draw(TextureFactory.Pixel,
-                new Rectangle((int)Position.X, (int)Position.Y - 10, (int)(48 * (HP / (float)MaxHP)), 5),
+                new Rectangle((int)Position.X + 40, (int)Position.Y + 25, (int)(48 * (HP / (float)MaxHP)), 5),
                 Color.Lime);
         }
     }

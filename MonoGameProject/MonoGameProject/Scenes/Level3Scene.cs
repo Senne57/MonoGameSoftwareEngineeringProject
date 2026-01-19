@@ -94,8 +94,8 @@ namespace MonoGameProject.Scenes
 
             _cannons = new List<Cannon>
             {
-                new Cannon(cannonTexture, ballTexture, new Vector2(500, 330), new Vector2(-1, 0), ballDamage: 30),
-                new Cannon(cannonTexture, ballTexture, new Vector2(850, 230), new Vector2(-1, -0.2f), ballDamage: 30),
+                new Cannon(cannonTexture, ballTexture, new Vector2(550, 330), new Vector2(-1, 0), ballDamage: 30),
+                new Cannon(cannonTexture, ballTexture, new Vector2(950, 230), new Vector2(-1, -0.2f), ballDamage: 30),
                 new Cannon(cannonTexture, ballTexture, new Vector2(1300, 280), new Vector2(-1, 0.1f), ballDamage: 30),
                 new Cannon(cannonTexture, ballTexture, new Vector2(1700, 330), new Vector2(-1, 0), ballDamage: 30),
                 new Cannon(cannonTexture, ballTexture, new Vector2(2200, 230), new Vector2(-1, -0.15f), ballDamage: 30),
