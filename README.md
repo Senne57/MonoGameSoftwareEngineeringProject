@@ -1,12 +1,11 @@
 # MonoGameSoftwareEngineeringProject
 ## Tutorial
 ### Controls
-Controls
-Q/Left Arrow = Move Left
-D/Right Arrow = Move Right
-Z/Up Arrow = Jump
-E = Attack
-R = Respawn (only when dead)
+- Q/Left Arrow = Move Left
+- D/Right Arrow = Move Right
+- Z/Up Arrow = Jump
+- E = Attack
+- R = Respawn (only when dead)
 ### Normal enemy
 The normal enemy can be killed by the normal attack (E) or by jumping on the head of the enemy
 ### Amored enemy
