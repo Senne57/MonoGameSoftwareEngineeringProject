@@ -7,8 +7,10 @@ using System.Collections.Generic;
 namespace MonoGameProject.Entities
 {
     /// <summary>
-    /// Abstract base class for all enemy types
-    /// Subclasses must implement their own hitboxes and behaviors
+    /// Enemy - Open/Closed Principle
+    /// OPEN voor uitbreiding: Ik kan nieuwe enemy types maken (NormalEnemy, ArmoredKnight, FlyingBoss)
+    /// CLOSED voor modificatie: Ik hoef deze base class niet te wijzigen voor nieuwe enemies
+    /// Voordeel: Nieuwe enemy toevoegen zonder bestaande code te breken
     /// </summary>
     public abstract class Enemy : Entity
     {
@@ -23,7 +25,7 @@ namespace MonoGameProject.Entities
         protected float _speed = 80f;
         protected bool _facingRight = true;
 
-        // Subclasses define their own collision boxes
+        // OCP: Abstract properties - subclasses implementeren hun eigen versie
         public abstract Rectangle Bounds { get; }
         public abstract Rectangle HeadHitbox { get; }
         public abstract bool CanBeStomped { get; }
@@ -83,7 +85,7 @@ namespace MonoGameProject.Entities
 
         protected abstract float GetGroundOffset();
 
-        // Virtual - can be overridden for special damage handling (e.g. armor)
+        // OCP: Virtual method - subclasses kunnen override voor custom behavior
         public virtual void TakeDamage(int dmg)
         {
             if (_isDead) return;

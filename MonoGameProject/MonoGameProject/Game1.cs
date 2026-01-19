@@ -6,8 +6,29 @@ using MonoGameProject.Scenes;
 namespace MonoGameProject
 {
     /// <summary>
-    /// Main game class - entry point for MonoGame
-    /// Handles initialization, content loading, and game loop
+    /// Game1 - Main game class
+    /// 
+    /// SOLID Principes in dit project:
+    /// 
+    /// S - Single Responsibility:
+    ///     CollisionManager: alleen collision detection
+    ///     MusicManager: alleen muziek management
+    ///     
+    /// O - Open/Closed:
+    ///     Enemy base class: extend voor nieuwe enemies zonder base te wijzigen
+    ///     BackgroundFactory: nieuwe factory methods toevoegen
+    ///     
+    /// L - Liskov Substitution:
+    ///     List<Enemy> werkt met alle enemy types (NormalEnemy, ArmoredKnight, FlyingBoss)
+    ///     CollisionManager accepteert alle Enemy subclasses
+    ///     
+    /// I - Interface Segregation:
+    ///     IScene: kleine interface met alleen Update en Draw
+    ///     Scenes implementeren alleen wat ze nodig hebben
+    ///     
+    /// D - Dependency Inversion:
+    ///     SceneManager hangt af van IScene abstractie
+    ///     LevelScene hangt af van Background abstractie
     /// </summary>
     public class Game1 : Game
     {

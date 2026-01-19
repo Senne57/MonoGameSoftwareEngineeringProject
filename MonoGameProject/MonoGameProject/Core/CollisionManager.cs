@@ -6,12 +6,15 @@ using System.Collections.Generic;
 namespace MonoGameProject.Core
 {
     /// <summary>
-    /// Centralized collision detection system
-    /// Separates collision logic from entity behavior
+    /// CollisionManager - Single Responsibility Principle
+    /// Deze klasse heeft 1 verantwoordelijkheid: collision detection
+    /// Doet GEEN rendering, game logic of input handling
+    /// Voordeel: Als er collision bugs zijn, weet ik exact waar te zoeken
     /// </summary>
     public class CollisionManager
     {
-        // Player platform collision with previous-frame landing detection
+        // Player <-> Platform collision
+        // SRP: Deze method doet alleen platform landing detection, niets anders
         public void CheckPlayerPlatformCollisions(Player player, List<Platform> platforms)
         {
             player.SetGrounded(false);
@@ -56,7 +59,10 @@ namespace MonoGameProject.Core
             }
         }
 
-        // Three collision types: Stomp (head), Attack (weapon), Touch (body)
+        // Liskov Substitution Principle:
+        // Deze method accepteert List<Enemy> - kan NormalEnemy, ArmoredKnight, FlyingBoss bevatten
+        // Alle subclasses zijn vervangbaar zonder dat de method kapot gaat
+        // Voordeel: Werkt met alle enemy types zonder if-statements om type te checken
         public void CheckPlayerEnemyCollisions(Player player, List<Enemy> enemies)
         {
             foreach (var enemy in enemies)

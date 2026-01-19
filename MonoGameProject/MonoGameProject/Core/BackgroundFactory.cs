@@ -5,8 +5,10 @@ using System.Collections.Generic;
 namespace MonoGameProject.Core
 {
     /// <summary>
-    /// Factory for creating different background types
-    /// Centralizes background creation logic
+    /// BackgroundFactory - Open/Closed Principle
+    /// OPEN voor uitbreiding: Ik kan nieuwe factory methods toevoegen (CreateLevel4Background)
+    /// CLOSED voor modificatie: Bestaande methods blijven ongewijzigd
+    /// Voordeel: Nieuwe backgrounds toevoegen zonder bestaande scenes te wijzigen
     /// </summary>
     public static class BackgroundFactory
     {
@@ -37,9 +39,10 @@ namespace MonoGameProject.Core
             return new LayeredBackground(layers, mapWidth, mapHeight);
         }
 
-        // Convenience methods for each level
+        // OCP: Nieuwe background types toevoegen = nieuwe method, rest blijft ongewijzigd
         public static Background CreateLevel1Background(ContentManager content, int mapWidth, int mapHeight)
         {
+            // Factory method - encapsulates creation logic
             return CreateLayeredBackground(
                 content,
                 new[] { "1level1", "2level1", "3level1", "4level1", "5level1" },

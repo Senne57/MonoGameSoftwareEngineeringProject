@@ -11,6 +11,11 @@ namespace MonoGameProject.Scenes
     public class LevelScene : IScene
     {
         private Player _player;
+
+        // Liskov Substitution Principle:
+        // List<Enemy> kan alle enemy types bevatten (NormalEnemy, ArmoredKnight)
+        // Ze zijn allemaal vervangbaar - ik hoef niet te checken welk type het is
+        // Voordeel: foreach loop werkt met alle enemy types zonder type checks
         private List<Enemy> _enemies;
         private List<Platform> _platforms;
         private Camera _camera;
@@ -44,7 +49,7 @@ namespace MonoGameProject.Scenes
                 content.Load<Texture2D>("Attack_1"),
                 _spawnPoint
             );
-
+            // LSP: Verschillende enemy types in zelfde lijst - allemaal vervangbaar
             _enemies = new List<Enemy>
             {
                 new ArmoredKnight(
@@ -96,6 +101,7 @@ namespace MonoGameProject.Scenes
 
             _camera.Follow(_player.Position);
 
+            // LSP: Dit werkt voor ALLE enemy types zonder type checks
             foreach (var enemy in _enemies)
             {
                 enemy.Update(gameTime);

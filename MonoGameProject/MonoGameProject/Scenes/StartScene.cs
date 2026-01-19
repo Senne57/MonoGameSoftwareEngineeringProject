@@ -6,6 +6,12 @@ using MonoGameProject.Core;
 
 namespace MonoGameProject.Scenes
 {
+    /// <summary>
+    /// StartScene - Interface Segregation Principle
+    /// Implementeert IScene met alleen Update en Draw
+    /// Geen onnodige methods zoals SaveState of HandleInput
+    /// Voordeel: Scene implementeert alleen wat het echt nodig heeft
+    /// </summary>
     public class StartScene : IScene
     {
         private SpriteFont _font;

@@ -6,11 +6,14 @@ using System.Collections.Generic;
 namespace MonoGameProject.Core
 {
     /// <summary>
-    /// Singleton music manager - ensures only one instance exists
-    /// Handles all background music playback
+    /// MusicManager - Single Responsibility Principle
+    /// Deze klasse heeft 1 verantwoordelijkheid: muziek management
+    /// Doet GEEN gameplay logic, collision detection of rendering
+    /// Scenes hoeven niet te weten hoe MediaPlayer werkt
     /// </summary>
     public class MusicManager
     {
+        // Singleton instance
         private static MusicManager _instance;
         private Dictionary<string, Song> _songs;
         private Song _currentSong;
@@ -40,6 +43,7 @@ namespace MonoGameProject.Core
             }
         }
 
+        // SRP: Play method doet alleen muziek afspelen, geen side effects
         public void Play(string name, bool repeat = true)
         {
             if (_songs.ContainsKey(name))

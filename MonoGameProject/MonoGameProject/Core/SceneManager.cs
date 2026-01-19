@@ -4,8 +4,10 @@ using Microsoft.Xna.Framework.Graphics;
 namespace MonoGameProject.Core
 {
     /// <summary>
-    /// Manages scene transitions and current active scene
-    /// Works with IScene interface for flexibility
+    /// SceneManager - Dependency Inversion Principle
+    /// Hangt af van IScene ABSTRACTIE, niet van concrete scenes (LevelScene, StartScene)
+    /// Voordeel: Nieuwe scenes toevoegen zonder SceneManager te wijzigen
+    /// High-level module (SceneManager) hangt niet af van low-level modules (concrete scenes)
     /// </summary>
     public class SceneManager
     {
